@@ -112,9 +112,6 @@ int main(int argc, char *argv[])
 	printf("Init Vpp.\n");
 	init_vpp();
 
-	printf("Init ldim.\n");
-	init_ldim();
-
 	/* printf("set bri con sat hue & wb.\n"); */
 	/* vpu_pq_set(); */
 	/* mdelay(400); */
@@ -140,9 +137,6 @@ int main(int argc, char *argv[])
 
 	printf("Start Vpp.\n");
 	start_vpp();
-
-	printf("Init spi local dimming.\n");
-	spi_local_dimming_task_init();
 
 #ifdef ENABLE_AUTO_BACKLIGHT
 	printf("Start auto_backlight\n");

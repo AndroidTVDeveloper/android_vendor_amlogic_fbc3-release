@@ -9,11 +9,9 @@ typedef enum panel_format_e{
 }panel_format_t;
 
 typedef enum vpu_outputmode_e{
-	T_1080P50HZ = 0,
-    T_2160P50HZ420,
-    T_1080P50HZ44410BIT,
-    T_2160P50HZ42010BIT,
-    T_2160P50HZ42210BIT,
+	OUTPUT_LVDS = 0,
+	OUTPUT_VB1,
+	PORT_MAX,
 }vpu_outputmode_t;
 
 typedef enum vpu_timing_e{
@@ -177,8 +175,6 @@ extern int get_panel_power_on_dly(void);
 extern void panel_init(void);
 
 
-#define IS_1080P(mode)	((mode == T_1080P50HZ) || \
-						 (mode == T_1080P50HZ44410BIT))
 
 extern void panel_backlight_power(char val);
 

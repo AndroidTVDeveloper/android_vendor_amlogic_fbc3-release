@@ -55,7 +55,7 @@ extern void             aocec_rd_check_reg (unsigned long addr, unsigned long ex
 extern void             aocec_wr_reg (unsigned long addr, unsigned long data);
 extern void             aocec_wr_reg_fast (unsigned long addr, unsigned long data);
 extern void				hdmirx_set_DPLL(int lvl);
-extern void 			hdmirx_DPLL_reset(int lvl);
+extern void 			hdmirx_DPLL_reset(void);
 extern void 			hdmirx_audio_fifo_rst(void);
 extern void 			hdmirx_CDR_reset(void);
 
@@ -119,6 +119,7 @@ extern int vofsLin;
 extern int enable_10bit;
 extern int clk_divider;
 extern int enable_10bit_input;
+extern int pll_rst_counter;
 //------------------------------------------------------------------------------
 // Defines for simulation
 //------------------------------------------------------------------------------

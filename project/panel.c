@@ -15,7 +15,7 @@ unsigned char customer_ptn = 0;
 
 panel_config_t panel_aml = {
 
-	.output_mode = T_1080P50HZ,
+    .output_mode = OUTPUT_LVDS,
 	.lvds_timing = TIMING_1920x1080P60,
 	.vx1_timing = TIMING_3840x2160P60,
 
@@ -83,8 +83,7 @@ panel_config_t panel_aml = {
 };
 
 panel_config_t panel_aml_vb1_3B = {
-
-	.output_mode = T_2160P50HZ420,
+	.output_mode = OUTPUT_VB1,
 	.lvds_timing = TIMING_1920x1080P60,
 	.vx1_timing = TIMING_3840x2160P60,
 
@@ -140,8 +139,7 @@ panel_config_t panel_aml_vb1_3B = {
 };
 
 panel_config_t panel_aml_vb1_4B = {
-
-	.output_mode = T_2160P50HZ420,
+	.output_mode = OUTPUT_VB1,
 	.lvds_timing = TIMING_1920x1080P60,
 	.vx1_timing = TIMING_3840x2160P60,
 
@@ -212,8 +210,7 @@ panel_config_t panel_aml_vb1_4B = {
 };
 
 panel_config_t panel_aml_vb1444_4B = {
-
-	.output_mode = T_2160P50HZ420,
+	.output_mode = OUTPUT_VB1,
 	.lvds_timing = TIMING_1920x1080P60,
 	.vx1_timing = TIMING_3840x2160P60,
 
@@ -283,8 +280,7 @@ panel_config_t panel_aml_vb1444_4B = {
 };
 
 panel_config_t panel_aml_vb1_4k1k_4B = {
-
-	.output_mode = T_2160P50HZ420,
+	.output_mode = OUTPUT_VB1,
 	.lvds_timing = TIMING_1920x1080P60,
 	.vx1_timing = TIMING_4kx1kP120_3D_SG,
 
@@ -340,8 +336,7 @@ panel_config_t panel_aml_vb1_4k1k_4B = {
 };
 
 panel_config_t panel_aml_vb1_4B_ext1 = {
-
-	.output_mode = T_2160P50HZ420,
+	.output_mode = OUTPUT_VB1,
 	.lvds_timing = TIMING_1920x1080P60,
 	.vx1_timing = TIMING_3840x2160P60,
 
@@ -508,14 +503,14 @@ vpu_timing_t get_timing_mode(void)
 
 	out_mode = get_output_mode();
 
-	if (out_mode == T_1080P50HZ) {
+    if (out_mode == OUTPUT_LVDS) {
 
 		curr_timing = panel_param->lvds_timing;
 
 		printf("the outputmode is lvds, the current timing is %d.\n",
 		       curr_timing);
 
-	} else if (out_mode == T_2160P50HZ420) {
+	} else if (out_mode == OUTPUT_VB1) {
 
 		curr_timing = panel_param->vx1_timing;
 
