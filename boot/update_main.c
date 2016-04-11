@@ -35,7 +35,7 @@ void init_osd(void)
 	int i;
 	/* hide_logo(); */
 	OSD_Enable(0);
-    if (OUTPUT_LVDS == panel_param->output_mode) {
+    if (IS_1080P(panel_param->output_mode)) {
 		OSD_Initial(1920, 1080, 0, 0, 1919, 1079);
 		OSD_SetFontScale(1, 1);
 	} else {
@@ -157,7 +157,7 @@ void osd_vpu_clock_set(void)
 #if 1
 	vpu_timing_t vpu_timing = get_timing_mode();
 
-	if (OUTPUT_LVDS== get_output_mode())
+	if (T_1080P50HZ == get_output_mode())
 		vclk_set_encl_lvds(vpu_timing, LVDS_PORTS);
 	else
 		vclk_set_encl_vx1(vpu_timing, VX1_LANE_NUM, VX1_BYTE_NUM);

@@ -15,7 +15,7 @@ unsigned char customer_ptn = 0;
 
 panel_config_t panel_aml = {
 
-    .output_mode = OUTPUT_LVDS,
+	.output_mode = T_1080P50HZ,
 	.lvds_timing = TIMING_1920x1080P60,
 	.vx1_timing = TIMING_3840x2160P60,
 
@@ -70,11 +70,11 @@ panel_config_t panel_aml = {
 	.ManufactureID = {
 			  0x05, 0xAc},
 	.ProductID = {
-		      0xff, 0xff},
+			  0xff, 0xff},
 	.SerialNumber = {
 			 0xff, 0xff, 0xff, 0xff},
 	.ManufactureDate = {
-			    0x00, 0x19},
+				0x00, 0x19},
 	.ChipID = {
 		   0xfb, 0x0c},
 	.PanelInfo = 0x03,
@@ -83,7 +83,7 @@ panel_config_t panel_aml = {
 };
 
 panel_config_t panel_aml_vb1_3B = {
-	.output_mode = OUTPUT_VB1,
+	.output_mode = T_2160P50HZ420,
 	.lvds_timing = TIMING_1920x1080P60,
 	.vx1_timing = TIMING_3840x2160P60,
 
@@ -139,7 +139,7 @@ panel_config_t panel_aml_vb1_3B = {
 };
 
 panel_config_t panel_aml_vb1_4B = {
-	.output_mode = OUTPUT_VB1,
+	.output_mode = T_1080P50HZ44410BIT,
 	.lvds_timing = TIMING_1920x1080P60,
 	.vx1_timing = TIMING_3840x2160P60,
 
@@ -197,81 +197,11 @@ panel_config_t panel_aml_vb1_4B = {
 	.ManufactureID = {
 			  0x05, 0xAc},
 	.ProductID = {
-		      0xff, 0xff},
+			  0xff, 0xff},
 	.SerialNumber = {
 			 0xff, 0xff, 0xff, 0xff},
 	.ManufactureDate = {
-			    0x00, 0x19},
-	.ChipID = {
-		   0xfb, 0x0c},
-	.PanelInfo = 0x01,
-	.ThreeDinfo = 0x00,
-	.SpecicalInfo = 0x00,
-};
-
-panel_config_t panel_aml_vb1444_4B = {
-	.output_mode = OUTPUT_VB1,
-	.lvds_timing = TIMING_1920x1080P60,
-	.vx1_timing = TIMING_3840x2160P60,
-
-	.format = PANEL_YUV444,
-
-	.reverse = 0,
-	.scaler = 0,
-
-	.clk = 0x63,
-	.repack = 1,
-	.odd_even = 0,
-	.hv_invert = 0,
-	.lsb_first = 0,
-	.pn_swap = 0,
-	.ports = 1,
-	.bit_size = 0,
-	.b_select = 0,
-	.g_select = 1,
-	.r_select = 2,
-	.reg_de_exten = 0,
-	.reg_blank_align = 0,
-	.lvds_swap = 7,
-	.clk_pin_swap = 0,
-
-	.bl_inverter = 1,
-
-	.lane_num = 8,
-	.byte_num = 4,
-	.region_num = 2,
-	.color_fmt = 4,
-
-	.vx1_lockn_option = -1,
-	.vx1_counter_option = 0,
-
-	.vx1_lvds_combo_ctl0 = 0x00005E00,
-	/* def value 0x00000168, def eye chart value 0x00000178 */
-	.vx1_lvds_combo_ctl1 = 0x00000168,
-	/* def value 0x0FF0003F, def eye chart value 0x0FF2003F */
-	.vx1_lvds_combo_ctl2 = 0x0FF0003F,
-	.vx1_lvds_combo_ctl3 = 0x00000000,
-
-	.pwm_duty = 128,
-	.pwm_hz = 120,
-
-	.panel_power_on_delay = 20,
-	.panel_power_off_delay = 0,
-	.pwm_enable_delay = 0,
-	.pwm_disable_delay = 0,
-	.clock_enable_delay = 0,
-	.clock_disable_delay = 0,
-	.backlight_power_on_delay = 500,
-	.backlight_power_off_delay = 500,
-
-	.ManufactureID = {
-			  0x05, 0xAc},
-	.ProductID = {
-		      0xff, 0xff},
-	.SerialNumber = {
-			 0xff, 0xff, 0xff, 0xff},
-	.ManufactureDate = {
-			    0x00, 0x19},
+				0x00, 0x19},
 	.ChipID = {
 		   0xfb, 0x0c},
 	.PanelInfo = 0x01,
@@ -280,9 +210,9 @@ panel_config_t panel_aml_vb1444_4B = {
 };
 
 panel_config_t panel_aml_vb1_4k1k_4B = {
-	.output_mode = OUTPUT_VB1,
+	.output_mode = T_2160P50HZ42010BIT,
 	.lvds_timing = TIMING_1920x1080P60,
-	.vx1_timing = TIMING_4kx1kP120_3D_SG,
+	.vx1_timing = TIMING_3840x2160P60,
 
 	.format = PANEL_YUV420,
 
@@ -336,7 +266,7 @@ panel_config_t panel_aml_vb1_4k1k_4B = {
 };
 
 panel_config_t panel_aml_vb1_4B_ext1 = {
-	.output_mode = OUTPUT_VB1,
+	.output_mode = T_2160P50HZ42210BIT,
 	.lvds_timing = TIMING_1920x1080P60,
 	.vx1_timing = TIMING_3840x2160P60,
 
@@ -372,10 +302,8 @@ panel_config_t panel_aml_vb1_4B_ext1 = {
 	.vx1_counter_option = 0,
 
 	.vx1_lvds_combo_ctl0 = 0x00005E00,
-	/* def value 0x00000168, def eye chart value 0x00000178 */
-	.vx1_lvds_combo_ctl1 = 0x00000168,
-	/* def value 0x0FF0003F, def eye chart value 0x0FF2003F */
-	.vx1_lvds_combo_ctl2 = 0x0FF0003F,
+	.vx1_lvds_combo_ctl1 = 0x00000168, //def value 0x00000168, def eye chart value 0x00000178
+	.vx1_lvds_combo_ctl2 = 0x0FF0003F, //def value 0x0FF0003F, def eye chart value 0x0FF2003F
 	.vx1_lvds_combo_ctl3 = 0x00000000,
 
 	.pwm_duty = 128,
@@ -393,13 +321,76 @@ panel_config_t panel_aml_vb1_4B_ext1 = {
 	.ManufactureID = {
 			  0x05, 0xAc},
 	.ProductID = {
-		      0xff, 0xff},
+			  0xff, 0xff},
 	.SerialNumber = {
 			 0xff, 0xff, 0xff, 0xff},
 	.ManufactureDate = {
-			    0x00, 0x19},
+				0x00, 0x19},
 	.ChipID = {
 		   0xfb, 0x0c},
+	.PanelInfo = 0x01,
+	.ThreeDinfo = 0x00,
+	.SpecicalInfo = 0x00,
+};
+
+panel_config_t panel_aml_vb1444_4B = {
+	.output_mode = T_2160P50HZ444,
+	.lvds_timing = TIMING_1920x1080P60,
+	.vx1_timing = TIMING_3840x2160P60,
+
+	.format = PANEL_YUV444,
+
+	.reverse = 0,
+	.scaler = 0,
+
+	.clk = 0x63,
+	.repack = 1,
+	.odd_even = 0,
+	.hv_invert = 0,
+	.lsb_first = 0,
+	.pn_swap = 0,
+	.ports = 1,
+	.bit_size = 0,
+	.b_select = 0,
+	.g_select = 1,
+	.r_select = 2,
+	.reg_de_exten = 0,
+	.reg_blank_align = 0,
+	.lvds_swap = 7,
+	.clk_pin_swap = 0,
+
+	.bl_inverter = 1,
+
+	.lane_num = 8,
+	.byte_num = 4,
+	.region_num = 2,
+	.color_fmt = 4,
+
+	.vx1_lockn_option = -1,
+	.vx1_counter_option = 0,
+
+	.vx1_lvds_combo_ctl0 = 0x00005E00,
+	.vx1_lvds_combo_ctl1 = 0x00000168, //def value 0x00000168, def eye chart value 0x00000178
+	.vx1_lvds_combo_ctl2 = 0x0FF0003F, //def value 0x0FF0003F, def eye chart value 0x0FF2003F
+	.vx1_lvds_combo_ctl3 = 0x00000000,
+
+	.pwm_duty =128,
+	.pwm_hz = 120,
+
+	.panel_power_on_delay = 20,
+	.panel_power_off_delay = 0,
+	.pwm_enable_delay = 0,
+	.pwm_disable_delay = 0,
+	.clock_enable_delay = 0,
+	.clock_disable_delay = 0,
+	.backlight_power_on_delay = 500,
+	.backlight_power_off_delay = 500,
+
+	.ManufactureID = {0x05,0xAc},
+	.ProductID = {0xff,0xff},
+	.SerialNumber = {0xff,0xff,0xff,0xff},
+	.ManufactureDate = {0x00,0x19},
+	.ChipID = {0xfb,0x0c},
 	.PanelInfo = 0x01,
 	.ThreeDinfo = 0x00,
 	.SpecicalInfo = 0x00,
@@ -408,7 +399,7 @@ panel_config_t panel_aml_vb1_4B_ext1 = {
 #define panel_power(id, action) panel_power_##action##_aml();
 #define backlight_power(id, action) backlight_power_##action##_aml();
 
-#define CC_PANEL_MAX_COUNT    (35)
+#define CC_PANEL_MAX_COUNT	(35)
 
 int get_panel_max_count(void)
 {
@@ -426,7 +417,7 @@ int get_panel_def_id(void)
 	return PROJECT_ID;
 
 #else /*
-       */
+	   */
 	printf("id2%d\n");
 
 	return 2;
@@ -440,10 +431,8 @@ panel_config_t *gPanelParams[CC_PANEL_MAX_COUNT + 1] = {
 	&panel_aml,
 	&panel_aml_vb1_3B,
 	&panel_aml_vb1_4B,
-
 	&panel_aml_vb1_4k1k_4B,
 	&panel_aml_vb1_4B_ext1,
-
 	&panel_aml_vb1444_4B,
 	NULL,
 };
@@ -459,8 +448,8 @@ static void get_panel_by_id(int id)
 		tmp_params_cnt += 1;
 
 	printf
-	    ("id (%d), panel params define count = %d, max panel count = %d.\n",
-	     id, tmp_params_cnt, CC_PANEL_MAX_COUNT);
+		("id (%d), panel params define count = %d, max panel count = %d.\n",
+		 id, tmp_params_cnt, CC_PANEL_MAX_COUNT);
 
 	if (id >= 0 && id < tmp_params_cnt && id < get_panel_max_count()) {
 
@@ -488,10 +477,12 @@ vpu_outputmode_t get_output_mode(void)
 }
 
 static char *panel_format_table[] = {
-	"normal",
+	"1080p",
 	"YUV420",
-	"YUV444",
-	"invalid",
+	"YUV44410bit",
+	"YUV42010BIT",
+	"YUV42210BIT",
+	"yuv444"
 };
 
 vpu_timing_t get_timing_mode(void)
@@ -503,32 +494,15 @@ vpu_timing_t get_timing_mode(void)
 
 	out_mode = get_output_mode();
 
-    if (out_mode == OUTPUT_LVDS) {
-
+	if (out_mode == T_1080P50HZ) {
 		curr_timing = panel_param->lvds_timing;
-
-		printf("the outputmode is lvds, the current timing is %d.\n",
-		       curr_timing);
-
-	} else if (out_mode == OUTPUT_VB1) {
-
-		curr_timing = panel_param->vx1_timing;
-
-		printf("the outputmode is vx1, the current timing is %d.\n",
-		       curr_timing);
-
-		printf("lane_num: %d, byte_num: %d, region_num: %d\n",
-		       panel_param->lane_num, panel_param->byte_num,
-		       panel_param->region_num);
-
-		printf("format: %s\n", panel_format_table[panel_param->format]);
-
+		printf("the outputmode is lvds, the current timing is %d.\n", curr_timing);
 	} else {
-
-		printf("the outputmode is error, using default timing!\n");
-
-		curr_timing = panel_param->lvds_timing;
-
+		curr_timing = panel_param->vx1_timing;
+		printf("the outputmode is vx1, the current timing is %d.\n", curr_timing);
+	printf("lane_num: %d, byte_num: %d, region_num: %d\n",
+		panel_param->lane_num, panel_param->byte_num, panel_param->region_num);
+	printf("format: %s\n", panel_format_table[panel_param->format]);
 	}
 
 	return curr_timing;
@@ -694,7 +668,7 @@ unsigned int reboot_func(void)
 }
 
 void get_vx1_lvds_combo_ctl(unsigned int *ctl0, unsigned int *ctl1,
-			    unsigned int *ctl2, unsigned int *ctl3)
+				unsigned int *ctl2, unsigned int *ctl3)
 {
 
 	*ctl0 = panel_param->vx1_lvds_combo_ctl0;
@@ -716,7 +690,7 @@ void panel_init(void)
 	project_id = read_project_id();
 
 #else /*
-       */
+	   */
 	unsigned int tmp_prj_id_addr = SPI_BASE + USER_CRI_DATA_START;
 
 	unsigned int tmp_crc = 0, prj_id_chksum = 0;
@@ -733,7 +707,7 @@ void panel_init(void)
 
 		printf("cri data project id checksum error");
 		printf("(%d, 0x%08X, 0x%08X)!\n",
-		       project_id, tmp_crc, prj_id_chksum);
+			   project_id, tmp_crc, prj_id_chksum);
 
 		project_id = get_panel_def_id();
 

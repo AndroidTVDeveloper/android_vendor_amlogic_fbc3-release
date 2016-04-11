@@ -599,7 +599,7 @@ void init_osd(void)
 	int i;
 	hide_logo();
 	OSD_Enable(0);
-    if (OUTPUT_LVDS == panel_param->output_mode) {
+    if (IS_1080P(panel_param->output_mode)) {
 		OSD_Initial(1920, 1080, 60, 60, 1859, 1019);
 		OSD_SetFontScale(1, 1);
 	} else {
@@ -638,7 +638,7 @@ void init_logo_osd(void)
 	OSD_Enable(0);
 	/* OSD_Initial(1920, 1080, 725, 360, 1194, 719); */
 	/* OSD_Initial(1920,1080,0,0,1919,1079); */
-    if (OUTPUT_LVDS == panel_param->output_mode) {
+    if (IS_1080P(panel_param->output_mode)) {
 		OSD_Initial(1920, 1080, 0, 0, 1919, 1079);
 		OSD_SetFontScale(1, 1);
 	} else {
