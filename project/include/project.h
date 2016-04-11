@@ -6,7 +6,6 @@
 
 #define HDMI_PORT_A		0//012
 #define HDMI_PORT_B		1//210
-#define HDMI_PORT_SWITCH  HDMI_PORT_A
 
 #define POWER_ON_MODE_SUSPEND	0
 #define POWER_ON_MODE_MAIN		1
@@ -20,7 +19,6 @@
 #define	LOCKN_TYPE_C			1//new method as GXTVBB's
 #define LOCKN_TYPE_SEL			LOCKN_TYPE_B
 
-#define ENABLE_10BIT_MODE	1
 
 
 #define HDMIRX_HPD_HIGH	1	//for other boards

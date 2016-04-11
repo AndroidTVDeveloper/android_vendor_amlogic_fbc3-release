@@ -19,4 +19,7 @@ fi
 export PANEL_ID=3
 export PANEL_PQ="3-aml_vb1_4k1k_4B.pq"
 export PANEL_MODULE="HV550QU2-305"
+export ENABLE_10BIT=1
+export WHICH_P=$1
+
 source project/prj_env.sh
