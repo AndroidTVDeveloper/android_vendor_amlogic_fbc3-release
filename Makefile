@@ -19,8 +19,7 @@ ASM_FLAGS+= -I./project/include/
 CC_FLAGS += -DIN_FBC_MAIN_CONFIG
 
 CC_FLAGS += -DUI_HAVE_LOGO=$(UI_HAVE_LOGO)
-CC_FLAGS += -DENABLE_10BIT=$(ENABLE_10BIT)
-CC_FLAGS += -DWHICH_P=\"$(WHICH_P)\"
+
 CC_FLAGS += -DPROJECT_ID=$(PANEL_ID)
 CC_FLAGS += -DPANEL_MODULE=\"$(PANEL_MODULE)\"
 
@@ -83,6 +82,20 @@ export LD_FLAGS_ADD
 main_mem_code_size = $(shell cat mm_size)
 main_spi_code_size = $(shell cat ms_size)
 
+export_symbols_lib:
+	echo "#ifndef RLINK_H" > export_symbols.h
+	echo "#define RLINK_H" >> export_symbols.h
+	printf "\textern  const char* switch_p;\n" >> export_symbols.h
+	printf "\textern  int bit10_mode;\n" >> export_symbols.h
+	echo "#endif" >> export_symbols.h
+
+	echo "#include \"export_symbols.h\"" > export_symbols.c
+	printf "\n" >> export_symbols.c
+	echo "const char* switch_p = \"$(p_switch)\";" >> export_symbols.c
+	echo "int bit10_mode = $(BIT10_MODE);" >> export_symbols.c
+
+	$(CC) $(CC_FLAGS) export_symbols.c
+
 all : main.elf
 main_libs:=fbc.a
 
@@ -90,7 +103,7 @@ add_flags:
 	$(eval CC_FLAGS_ADD = -Ml)
 	$(eval ASM_FLAGS_ADD = -Ml)
 main.elf: version.info add_flags $(OBJS)
-	$(LD) $(OBJS) $(main_libs) $(LD_LIB_PATH)/le/crt1.o $(LD_LIB_PATH)/le/crti.o $(LD_FLAGS) main.cmd -e _start -o $@
+	$(LD) $(OBJS) $(main_libs) export_symbols.o $(LD_LIB_PATH)/le/crt1.o $(LD_LIB_PATH)/le/crti.o $(LD_FLAGS) main.cmd -e _start -o $@
 	$(DUMPELF) $(DUMP_FLAGS) $@ > main.asm
 sections_info.asm : main.elf
 	$(DUMPELF) -s -q main.elf > sections_info.asm
@@ -126,7 +139,7 @@ spi_header:
 	openssl dgst -sha256 -binary -out rsa_key/head.sha256 rsa_key.bin
 	dd if=/dev/zero of=blocks_info.bin bs=4096 count=1
 
-spi:spi_main spi_boot spi_header
+spi:export_symbols_lib spi_main spi_boot spi_header
 	./tool/bin_op -i project -t pq -o pq.bin
 	cat par_info.bin blocks_info.bin boot/boot.bin rom.bin >> spi.bin
 	cat spi.bin pq.bin >> spi_pq.bin
@@ -169,6 +182,9 @@ clean:
 	@$(RM) -r ./out
 	@$(RM) -rf rsa_key/signature2048_1* rsa_key/head.sha256
 	@$(RM) add_partition_info
+
+distclean:
+	@$(RM) export_symbols*
 
 .c.o:
 	$(CC) $(CC_FLAGS) $< -o $@

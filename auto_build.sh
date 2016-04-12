@@ -1,12 +1,21 @@
 #!/bin/bash
 
-if [ $# -lt 2 ] || [ "$2" != "PA" ] && [ "$2" != "PB" ];then
-	echo ./setenv.sh "PA"
-	source ./setenv.sh "PA"	
+if [ -z $1 ];
+then
+	echo ./setenv.sh 
+	source ./setenv.sh
+else 
+	echo ./$1-setenv.sh
+	source ./$1-setenv.sh
+fi
+
+if [ -z $2 ] || [ "$2" != "PA" ] && [ "$2" != "PB" ];then
+	p_switch="PA"
 else
-	echo ./$1-setenv.sh $2
-	source ./$1-setenv.sh $2	
-fi 
+	p_switch=$2
+fi
+
+export p_switch
 
 make clean
 make spi 

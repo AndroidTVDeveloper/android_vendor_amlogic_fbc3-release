@@ -15,8 +15,6 @@ CC_FLAGS += -DBOOT_DEBUG_VERSION=$(BOOT_DEBUG_VERSION)
 CC_FLAGS += -DPROJECT_ID=$(PANEL_ID)
 CC_FLAGS += -DENABLE_AVMUTE_CONTROL=$(ENABLE_AVMUTE_CONTROL)
 CC_FLAGS += -DUSER_CRI_DATA_START=$(USER_CRI_DATA_START)
-CC_FLAGS += -DENABLE_10BIT=$(ENABLE_10BIT)
-CC_FLAGS += -DWHICH_P=\"$(WHICH_P)\"
 ASM_FLAGS+= -I./../include/vpp/
 ASM_FLAGS+= -I./../project/include/
 
@@ -64,6 +62,20 @@ export CC_FLAGS_ADD
 export ASM_FLAGS_ADD
 export LD_FLAGS_ADD
 
+export_symbols_lib:
+	echo "#ifndef RLINK_H" > ../export_symbols.h
+	echo "#define RLINK_H" >> ../export_symbols.h
+	printf "\textern  const char* switch_p;\n" >> ../export_symbols.h
+	printf "\textern  int bit10_mode;\n" >> ../export_symbols.h
+	echo "#endif" >> ../export_symbols.h
+
+	echo "#include \"export_symbols.h\"" > ../export_symbols.c
+	printf "\n" >> ../export_symbols.c
+	echo "const char* switch_p = \"$(p_switch)\";" >> ../export_symbols.c
+	echo "int bit10_mode = $(BIT10_MODE);" >> ../export_symbols.c
+
+	$(CC) $(CC_FLAGS) ../export_symbols.c -o ../export_symbols.o
+
 all : clean second_boot.elf suspend.elf update.elf
 
 first_boot.elf: pre_boot_src $(FIRST_SOBJS) $(FIRST_OBJS) $(FIRST_BOOT_LIB)
@@ -91,7 +103,7 @@ suspend.elf: $(SUS_SOBJS) $(SUS_OBJS) $(SUSPEND_LIB)
 	$(DUMPELF) $(DUMP_FLAGS) $@ > suspend.asm
 
 update.elf: clean_ex2_flags $(UOBJS) $(UPDATE_LIB)
-	$(LD) $(UOBJS) $(UPDATE_LIB) $(LD_LIB_PATH)/le/crt1.o $(LD_LIB_PATH)/le/crti.o $(LD_FLAGS) update.cmd -lhlt -e _start -o update.elf
+	$(LD) $(UOBJS) $(UPDATE_LIB) ../export_symbols.o  $(LD_LIB_PATH)/le/crt1.o $(LD_LIB_PATH)/le/crti.o $(LD_FLAGS) update.cmd -lhlt -e _start -o update.elf
 	$(DUMPELF) $(DUMP_FLAGS) update.elf > update.asm
 	$(STRIP) $(STRIP_FALGS) update.elf
 	$(OBJCOPY) $(COPY_FLAGS) $@ -o update_code.bin -ctl

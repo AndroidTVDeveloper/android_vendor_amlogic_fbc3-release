@@ -1,6 +1,6 @@
 ifeq ($(ARC_COMPILER), GNU)
   include ../makefile_gnu
-else 
+else
   ifeq ($(ARC_COMPILER), METAWARE)
     include ../makefile_metaware
   endif
@@ -25,14 +25,14 @@ UPDATE_LIB = fbc_update.a
 
 OBJ_SRCS = ./first_boot.c
 OBJ_SRCS += ./relocate.c
-OBJ_SRCS += ./mini_console.c 
+OBJ_SRCS += ./mini_console.c
 
 FIRST_SSRCS	 = boot_rom.s
 FIRST_SRCS = ./$(LD_PRE_BOOT_PATH)/first_boot.c
 FIRST_SRCS += ./$(LD_PRE_BOOT_PATH)/relocate.c
 FIRST_SRCS += ./$(LD_PRE_BOOT_PATH)/mini_console.c
 
-FIRST_SOBJS    = $(FIRST_SSRCS:%.s=%.o$(SUFFIX)) 
+FIRST_SOBJS    = $(FIRST_SSRCS:%.s=%.o$(SUFFIX))
 FIRST_OBJS     = $(FIRST_SRCS:%.c=%.o$(SUFFIX))
 
 SRCS     = boot.c
@@ -62,6 +62,20 @@ export CC_FLAGS_ADD
 export ASM_FLAGS_ADD
 export LD_FLAGS_ADD
 
+export_symbols_lib:
+	echo "#ifndef RLINK_H" > ../export_symbols.h
+	echo "#define RLINK_H" >> ../export_symbols.h
+	printf "\textern  const char* switch_p;\n" >> ../export_symbols.h
+	printf "\textern  int bit10_mode;\n" >> ../export_symbols.h
+	echo "#endif" >> ../export_symbols.h
+
+	echo "#include \"export_symbols.h\"" > ../export_symbols.c
+	printf "\n" >> ../export_symbols.c
+	echo "const char* switch_p = \"$(p_switch)\";" >> ../export_symbols.c
+	echo "int bit10_mode = $(BIT10_MODE);" >> ../export_symbols.c
+
+	$(CC) $(CC_FLAGS) ../export_symbols.c -o ../export_symbols.o
+
 all : clean second_boot.elf suspend.elf update.elf
 
 first_boot.elf: pre_boot_src $(FIRST_SOBJS) $(FIRST_OBJS) $(FIRST_BOOT_LIB)
@@ -71,7 +85,7 @@ first_boot.elf: pre_boot_src $(FIRST_SOBJS) $(FIRST_OBJS) $(FIRST_BOOT_LIB)
 	$(OBJCOPY) $(COPY_FLAGS) $@ -o first_boot_code.bin -ctl
 	$(OBJCOPY) $(COPY_FLAGS) $@ -o first_boot_data.bin -cd
 	$(DUMPELF) $(DUMP_FLAGS) $@ > first_boot.asm
-	
+
 second_boot.elf: clean_ex1_flags $(SOBJS) $(OBJS) $(BOOT_LIB)
 	$(LD) $(SOBJS) $(OBJS) $(BOOT_LIB) $(LD_FLAGS) boot.cmd -o second_boot.elf
 	$(DUMPELF) $(DUMP_FLAGS) second_boot.elf > second_boot.asm
@@ -79,7 +93,7 @@ second_boot.elf: clean_ex1_flags $(SOBJS) $(OBJS) $(BOOT_LIB)
 	$(OBJCOPY) $(COPY_FLAGS) $@ -o second_boot_code.bin -ctl
 	$(OBJCOPY) $(COPY_FLAGS) $@ -o second_boot_data.bin -cd
 	$(DUMPELF) $(DUMP_FLAGS) $@ > second_boot.asm
-	
+
 suspend.elf: $(SUS_SOBJS) $(SUS_OBJS) $(SUSPEND_LIB)
 	$(LD) $(SUS_SOBJS) $(SUS_OBJS) $(SUSPEND_LIB) $(LD_FLAGS) suspend.cmd -o suspend.elf
 	$(DUMPELF) $(DUMP_FLAGS) suspend.elf > suspend.asm
@@ -87,16 +101,16 @@ suspend.elf: $(SUS_SOBJS) $(SUS_OBJS) $(SUSPEND_LIB)
 	$(OBJCOPY) $(COPY_FLAGS) $@ -o suspend_code.bin -ctl
 	$(OBJCOPY) $(COPY_FLAGS) $@ -o suspend_data.bin -cd
 	$(DUMPELF) $(DUMP_FLAGS) $@ > suspend.asm
-	
+
 update.elf: clean_ex2_flags $(UOBJS) $(UPDATE_LIB)
-	$(LD) $(UOBJS) $(UPDATE_LIB) $(LD_LIB_PATH)/le/crt1.o $(LD_LIB_PATH)/le/crti.o $(LD_FLAGS) update.cmd -lhlt -e _start -o update.elf
+	$(LD) $(UOBJS) $(UPDATE_LIB) ../export_symbols.o  $(LD_LIB_PATH)/le/crt1.o $(LD_LIB_PATH)/le/crti.o $(LD_FLAGS) update.cmd -lhlt -e _start -o update.elf
 	$(DUMPELF) $(DUMP_FLAGS) update.elf > update.asm
 	$(STRIP) $(STRIP_FALGS) update.elf
 	$(OBJCOPY) $(COPY_FLAGS) $@ -o update_code.bin -ctl
 	$(OBJCOPY) $(COPY_FLAGS) $@ -o update_data.bin -cd
 	$(DUMPELF) $(DUMP_FLAGS) $@ > update.asm
 	@$(RM) update_main.o
-	
+
 rom: clean first_boot.elf second_boot.elf suspend.elf update.elf
 	$(MK) -f makefile.rom
 	stat -c %s first_boot_code.bin > size.data
@@ -106,7 +120,7 @@ pre_boot_src: add_ex1_flags
 	@$(MKDIR) $(LD_PRE_BOOT_PATH)
 	@echo "cp: $(CP)"
 	@$(CP) $(OBJ_SRCS) ./$(LD_PRE_BOOT_PATH)
-	
+
 add_ex1_flags:
 	$(eval CC_FLAGS_EX1 += -D_IN_PRE_BOOT_)
 	$(eval ASM_FLAGS_EX1 += -D_IN_PRE_BOOT_)
@@ -114,7 +128,7 @@ add_ex1_flags:
 clean_ex1_flags:
 	$(eval CC_FLAGS_EX1 = )
 	$(eval ASM_FLAGS_EX1 = )
-	
+
 add_ex2_flags:
 	$(eval CC_FLAGS_EX2 += -D_USE_WITHOUT_UI_UPDATE_)
 	$(eval ASM_FLAGS_EX2 += -D_USE_WITHOUT_UI_UPDATE_)
@@ -122,7 +136,7 @@ add_ex2_flags:
 clean_ex2_flags:
 	$(eval CC_FLAGS_EX2 = )
 	$(eval ASM_FLAGS_EX2 = )
-	
+
 clean:
 	@rm -f $(OBJS) $(UOBJS) $(SUS_OBJS)
 	@rm -f *.asm
@@ -134,8 +148,8 @@ clean:
 	@rm -rf $(LD_PRE_BOOT_PATH)
 	@rm -f size.data
 
-.c.o:  
+.c.o:
 	$(CC) $(CC_FLAGS) $(CC_FLAGS_EX1)  $(CC_FLAGS_EX2) $< -o $@
 
-.s.o:  
+.s.o:
 	$(ASM) $(ASM_FLAGS) $(ASM_FLAGS_EX1) $(ASM_FLAGS_EX2) $< -o $@
