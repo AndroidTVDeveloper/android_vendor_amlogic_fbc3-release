@@ -183,7 +183,7 @@ clean:
 	@$(RM) -rf rsa_key/signature2048_1* rsa_key/head.sha256
 	@$(RM) add_partition_info
 
-distclean:
+distclean:clean
 	@$(RM) export_symbols*
 
 .c.o:

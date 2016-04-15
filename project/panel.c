@@ -527,10 +527,16 @@ void mdelay(int ms)
 
 void power_on_aml(void)
 {
+	*P_PREG_PAD_GPIO0_EN_N |= (1 << 11);
+
+	if (*P_PREG_PAD_GPIO0_I & (1 << 11))
+		printf("Not detect P311!!!");
 
 	*P_PREG_PAD_GPIO0_EN_N &= (~(1 << 1));
-
-	*P_PREG_PAD_GPIO0_O &= (~(1 << 1));
+	*P_PREG_PAD_GPIO0_O |= (1 << 1);
+	mdelay(500);
+	*P_PREG_PAD_GPIO0_EN_N &= (~(1 << 12));
+	*P_PREG_PAD_GPIO0_O &= (~(1 << 12));
 
 }
 
@@ -563,19 +569,19 @@ void panel_power_off_aml(void)
 
 void backlight_power_on_aml(void)
 {
-
+#ifdef ENABLE_LOCAL_DIMMING
 	*P_PREG_PAD_GPIO3_EN_N &= (~(1 << 12));
-
-	*P_PREG_PAD_GPIO3_O &= (~(1 << 12));
-
+#else
+	*P_PREG_PAD_GPIO0_EN_N &= (~(1 << 2));
+	*P_PREG_PAD_GPIO0_O &= (~(1 << 2));
+#endif
 }
 
 void backlight_power_off_aml(void)
 {
 
-	*P_PREG_PAD_GPIO3_EN_N &= (~(1 << 12));
-
-	*P_PREG_PAD_GPIO3_O |= (1 << 12);
+	*P_PREG_PAD_GPIO0_EN_N &= (~(1 << 2));
+	*P_PREG_PAD_GPIO0_O |= (1 << 2);
 
 }
 
