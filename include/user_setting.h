@@ -6,45 +6,45 @@
 //#include <vpp_api.h>
 #include <cmd.h>
 
-typedef struct white_balance_setting{
+typedef struct white_balance_setting {
 	unsigned char r_gain;
 	unsigned char g_gain;
 	unsigned char b_gain;
 	unsigned char r_offset;
 	unsigned char g_offset;
 	unsigned char b_offset;
-}white_balance_setting_t;
+} white_balance_setting_t;
 
 //save_parameter write_user_setting(unsigned char *s);
 //unsigned char read_user_setting();
 unsigned read_project_id();
-int write_project_id(unsigned val);
-char * read_device_id();
-int write_device_id(char * device_id);
-char * read_factory_sn();
-int write_factory_sn( char * pSn);
+int write_project_id ( unsigned val );
+char *read_device_id();
+int write_device_id ( char *device_id );
+char *read_factory_sn();
+int write_factory_sn ( char *pSn );
 unsigned char read_power_on_mode();
-int write_power_on_mode(unsigned char mode);
-char * read_HDCP_KEY();
-int write_HDCP_KEY(const char * key, int len);
-void d2d3_select(int mode);
+int write_power_on_mode ( unsigned char mode );
+char *read_HDCP_KEY();
+int write_HDCP_KEY ( const char *key, int len );
+void d2d3_select ( int mode );
 
-int write_wb_setting(vpu_colortemp_t mode, white_balance_setting_t * val);
-white_balance_setting_t * read_wb_setting(vpu_colortemp_t mode);
-int write_picmod_setting(vpu_picmod_t mode, vpu_picmod_table_t * val);
-vpu_picmod_table_t * read_picmod_setting(vpu_picmod_t mode);
+int write_wb_setting ( vpu_colortemp_t mode, white_balance_setting_t *val );
+white_balance_setting_t *read_wb_setting ( vpu_colortemp_t mode );
+int write_picmod_setting ( vpu_picmod_t mode, vpu_picmod_table_t *val );
+vpu_picmod_table_t *read_picmod_setting ( vpu_picmod_t mode );
 
-int select_project_id(unsigned int id);
+int select_project_id ( unsigned int id );
 
 int load_default_setting();
 int getcurentSource();
 
 int get_nature_lihgt_en();
-void set_nature_lihgt_en(unsigned int on_off);
+void set_nature_lihgt_en ( unsigned int on_off );
 
-extern void init_setting_task(void);
+extern void init_setting_task ( void );
 
-extern int clr_default_setting(int clr_version_flag);
-extern int clr_default_wb_setting(void);
+extern int clr_default_setting ( int clr_version_flag );
+extern int clr_default_wb_setting ( void );
 
 #endif

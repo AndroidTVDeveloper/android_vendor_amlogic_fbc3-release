@@ -31,27 +31,27 @@
 #define INPUT_CALL_TASK_MAX   1
 
 typedef struct {
-	list_t *     cmd_list;
+	list_t      *cmd_list;
 	unsigned int task_id;
 	unsigned int input_mask;
-	int (*func)(int key_value);
-}input_call_task_t;
+	int ( *func ) ( int key_value );
+} input_call_task_t;
 
 typedef struct {
-    int      input_type ; //to define which type we get, key up, key down, or mouse move, and so on
-    int      input_flag ; //to define input if valide or if it repeat key
-    int      input_data ; //input value
-    int      input_modifers ; //special key, like shift, ctrl, alt and so on
+	int      input_type ; //to define which type we get, key up, key down, or mouse move, and so on
+	int      input_flag ; //to define input if valide or if it repeat key
+	int      input_data ; //input value
+	int      input_modifers ; //special key, like shift, ctrl, alt and so on
 } INPUTDATA ;
 
 typedef struct {
-	  unsigned int      cmd_owner ;
-	  unsigned int      data ;
-}INPUT_MODULE_DATA;
+	unsigned int      cmd_owner ;
+	unsigned int      data ;
+} INPUT_MODULE_DATA;
 
 typedef struct {
-	  list_t                  list;
-	  INPUT_MODULE_DATA       input_data ;
-}INPUT_LIST;
+	list_t                  list;
+	INPUT_MODULE_DATA       input_data ;
+} INPUT_LIST;
 
 #endif /* INPUTDATA_H */

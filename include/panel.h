@@ -1,23 +1,23 @@
 #ifndef PANEL_H
 #define PANEL_H
 
-typedef enum panel_format_e{
+typedef enum panel_format_e {
 	PANEL_NORMAL = 0,
 	PANEL_YUV420,
 	PANEL_YUV444,
 	PANEL_MAX,
-}panel_format_t;
+} panel_format_t;
 
-typedef enum vpu_outputmode_e{
+typedef enum vpu_outputmode_e {
 	T_1080P50HZ = 0,
-    T_2160P50HZ420,
-    T_1080P50HZ44410BIT,
-    T_2160P50HZ42010BIT,
-    T_2160P50HZ42210BIT,
-    T_2160P50HZ444,
-}vpu_outputmode_t;
+	T_2160P50HZ420,
+	T_1080P50HZ44410BIT,
+	T_2160P50HZ42010BIT,
+	T_2160P50HZ42210BIT,
+	T_2160P50HZ444,
+} vpu_outputmode_t;
 
-typedef enum vpu_timing_e{
+typedef enum vpu_timing_e {
 	TIMING_NULL = 0,
 	TIMING_1366x768P60,
 	TIMING_1920x1080P50,
@@ -34,10 +34,10 @@ typedef enum vpu_timing_e{
 	TIMING_4kx1kP120_3D_SG,
 	TIMING_4kxd5kP240_3D_SG,
 	TIMING_MAX,
-}vpu_timing_t;
+} vpu_timing_t;
 
 
-typedef struct panel_config_s{
+typedef struct panel_config_s {
 	vpu_outputmode_t output_mode;
 	vpu_timing_t lvds_timing;
 	vpu_timing_t vx1_timing;
@@ -105,7 +105,7 @@ typedef struct panel_config_s{
 	//=0 1080p
 	//=1 4k2k
 	//=2 1366x768
-	char PanelInfo:4;
+	char PanelInfo: 4;
 	//=0 non-3D
 	//=1 frame packing
 	//=2 top bottom
@@ -116,10 +116,10 @@ typedef struct panel_config_s{
 	//=7 L+depth
 	//=8 L+depth+graphics-depth
 	//=9 Field alternative
-	char ThreeDinfo:4;
+	char ThreeDinfo: 4;
 	//bit0=1 panel screen upside-down; bit0=0 normal
 	char SpecicalInfo;
-}panel_config_t;
+} panel_config_t;
 
 /*
 typedef struct Usr_EDID_s{
@@ -153,33 +153,33 @@ typedef struct Usr_EDID_s{
 extern int project_id;
 extern panel_config_t *panel_param;
 
-vpu_outputmode_t get_output_mode(void);
-vpu_timing_t get_timing_mode(void);
+vpu_outputmode_t get_output_mode ( void );
+vpu_timing_t get_timing_mode ( void );
 
-int panel_suspend(void);
-int panel_resume(void);
+int panel_suspend ( void );
+int panel_resume ( void );
 
-void mdelay(int ms);
+void mdelay ( int ms );
 
-void power_on_aml(void);
-void power_off_aml(void);
-void panel_power_on_aml(void);
-void panel_power_off_aml(void);
-void backlight_power_on_aml(void);
-void backlight_power_off_aml(void);
-void set_led_onoff(unsigned char vcValue);
+void power_on_aml ( void );
+void power_off_aml ( void );
+void panel_power_on_aml ( void );
+void panel_power_off_aml ( void );
+void backlight_power_on_aml ( void );
+void backlight_power_off_aml ( void );
+void set_led_onoff ( unsigned char vcValue );
 
-void get_vx1_lvds_combo_ctl(unsigned int *ctl0, unsigned int *ctl1, unsigned int *ctl2, unsigned int *ctl3);
+void get_vx1_lvds_combo_ctl ( unsigned int *ctl0, unsigned int *ctl1, unsigned int *ctl2, unsigned int *ctl3 );
 
 int get_panel_max_count();
 int get_panel_def_id();
 
-extern int get_panel_power_on_dly(void);
-extern void panel_init(void);
+extern int get_panel_power_on_dly ( void );
+extern void panel_init ( void );
 
 
 
-extern void panel_backlight_power(char val);
+extern void panel_backlight_power ( char val );
 #define IS_1080P(mode)	((mode == T_1080P50HZ) || \
 						 (mode == T_1080P50HZ44410BIT))
 

@@ -23,8 +23,8 @@ typedef struct list_head list_t;
 	struct list_head name = LIST_HEAD_INIT(name)
 
 #define INIT_LIST_HEAD(ptr) do { \
-	(ptr)->next = (ptr); (ptr)->prev = (ptr); \
-} while (0)
+		(ptr)->next = (ptr); (ptr)->prev = (ptr); \
+	} while (0)
 
 /**
  * list_add - add a new entry
@@ -34,7 +34,7 @@ typedef struct list_head list_t;
  * Insert a new entry after the specified head.
  * This is good for implementing stacks.
  */
-void list_add(struct list_head *new_entry, struct list_head *head);
+void list_add ( struct list_head *new_entry, struct list_head *head );
 
 /**
  * list_add_tail - add a new entry
@@ -44,47 +44,48 @@ void list_add(struct list_head *new_entry, struct list_head *head);
  * Insert a new entry before the specified head.
  * This is useful for implementing queues.
  */
-void list_add_tail(struct list_head *new_entry, struct list_head *head);
+void list_add_tail ( struct list_head *new_entry, struct list_head *head );
 
 /**
  * list_del - deletes entry from list.
  * @entry: the element to delete from the list.
  * Note: list_empty on entry does not return true after this, the entry is in an undefined state.
  */
-void list_del(struct list_head *entry);
+void list_del ( struct list_head *entry );
 
 /**
  * list_del_init - deletes entry from list and reinitialize it.
  * @entry: the element to delete from the list.
  */
-void list_del_init(struct list_head *entry);
+void list_del_init ( struct list_head *entry );
 
 /**
  * list_move - delete from one list and add as another's head
  * @list: the entry to move
  * @head: the head that will precede our entry
  */
-void list_move(struct list_head *list, struct list_head *head);
+void list_move ( struct list_head *list, struct list_head *head );
 
 /**
  * list_move_tail - delete from one list and add as another's tail
  * @list: the entry to move
  * @head: the head that will follow our entry
  */
-void list_move_tail(struct list_head *list, struct list_head *head);
+void list_move_tail ( struct list_head *list, struct list_head *head );
 
 /**
  * list_splice - join two lists
  * @list: the new list to add.
  * @head: the place to add it in the first list.
  */
-void list_splice(struct list_head *list, struct list_head *head);
+void list_splice ( struct list_head *list, struct list_head *head );
 
 /**
  * list_empty - tests whether a list is empty
  * @head: the list to test.
  */
-static __inline__ int list_empty(struct list_head *head) {
+static __inline__ int list_empty ( struct list_head *head )
+{
 	return head->next == head;
 }
 
@@ -92,7 +93,7 @@ static __inline__ int list_empty(struct list_head *head) {
  * list_dequeue - dequeue the head of the list if there are more than one entry
  * @list: the list to dequeue
  */
-struct list_head * list_dequeue(struct list_head *list);
+struct list_head *list_dequeue ( struct list_head *list );
 
 /**
  * list_entry - get the struct for this entry
@@ -109,8 +110,8 @@ struct list_head * list_dequeue(struct list_head *list);
  * @head:	the head for your list.
  */
 #define list_for_each(pos, head) \
-		for (pos = (head)->next; pos != (head); \
-			pos = pos->next)
+	for (pos = (head)->next; pos != (head); \
+		 pos = pos->next)
 
 /**
  * list_for_each_safe	-	iterate over a list safe against removal of list entry
@@ -120,7 +121,7 @@ struct list_head * list_dequeue(struct list_head *list);
  */
 #define list_for_each_safe(pos, n, head) \
 	for (pos = (head)->next, n = pos->next; pos != (head); \
-		pos = n, n = pos->next)
+		 pos = n, n = pos->next)
 
 /**
  * list_for_each_prev	-	iterate over a list in reverse order
@@ -128,8 +129,8 @@ struct list_head * list_dequeue(struct list_head *list);
  * @head:	the head for your list.
  */
 #define list_for_each_prev(pos, head) \
-		for (pos = (head)->prev; pos != (head); \
-			pos = pos->prev)
+	for (pos = (head)->prev; pos != (head); \
+		 pos = pos->prev)
 
 /**
  * list_for_each_entry	-	iterate over list of given type
@@ -139,7 +140,7 @@ struct list_head * list_dequeue(struct list_head *list);
  */
 #define list_for_each_entry(pos, head, member)				\
 	for (pos = list_entry((head)->next, typeof(*pos), member);	\
-	     &pos->member != (head); 	\
-	     pos = list_entry(pos->member.next, typeof(*pos), member))
+		 &pos->member != (head); 	\
+		 pos = list_entry(pos->member.next, typeof(*pos), member))
 
 #endif

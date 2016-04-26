@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 
-typedef void (*interrupt_handler_t)(void);
+typedef void ( *interrupt_handler_t ) ( void );
 
 #define  INT_TYPE_FIQ       0
 #define  INT_TYPE_IRQ       0
@@ -37,14 +37,14 @@ typedef void (*interrupt_handler_t)(void);
 #define INT_VECTOR_HDMI_MEAS_IRQ          0x19
 #define INT_VECTOR_HDMIRX_VS_IRQ          0x1a
 
-int RegisterInterrupt(int vector, int fiq_flag, interrupt_handler_t handler);
+int RegisterInterrupt ( int vector, int fiq_flag, interrupt_handler_t handler );
 
-int UnregisterInterrupt(int vector, interrupt_handler_t handler);
+int UnregisterInterrupt ( int vector, interrupt_handler_t handler );
 
-int SetInterruptEnable(int vector, int enable);
+int SetInterruptEnable ( int vector, int enable );
 
-void DisableAllInterrupt(void);
+void DisableAllInterrupt ( void );
 
-void EnableAllInterrupt(void);
+void EnableAllInterrupt ( void );
 
 #endif //INTERRUPT_H

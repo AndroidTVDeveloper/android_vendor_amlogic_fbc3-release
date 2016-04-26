@@ -19,11 +19,11 @@
 #define SRAM2_BASE						0x80020000
 #define SRAM_SIZE						0x10000
 
-typedef struct _tag_spi_blocks_info_t{
+typedef struct _tag_spi_blocks_info_t {
 	char name[MAX_NAME_LEN];
 	unsigned int size;
 	unsigned int addr;
-}spi_blocks_t;
+} spi_blocks_t;
 
 typedef struct {
 	char name[MAX_NAME_LEN];
@@ -32,7 +32,7 @@ typedef struct {
 	unsigned int size;
 } check_info_t;
 
-int check_image(unsigned s_offs, int size);
+int check_image ( unsigned s_offs, int size );
 
 #define SPI_BASE								(0x41000000)
 

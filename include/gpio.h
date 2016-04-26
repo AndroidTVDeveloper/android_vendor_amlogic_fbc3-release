@@ -140,14 +140,14 @@
 #define GPIO_MAX             63
 
 #if 1
-extern int aml_gpio_name_map_num(const char *name);
-extern int aml_gpio_set_output(int gpio, int flag);
-extern int aml_gpio_set_input(int gpio);
-extern int aml_gpio_set(int gpio, int flag);
-extern unsigned int aml_gpio_input_get(int gpio);
+	extern int aml_gpio_name_map_num ( const char *name );
+	extern int aml_gpio_set_output ( int gpio, int flag );
+	extern int aml_gpio_set_input ( int gpio );
+	extern int aml_gpio_set ( int gpio, int flag );
+	extern unsigned int aml_gpio_input_get ( int gpio );
 
-extern int aml_pinmux_set(unsigned int mux_index, unsigned int mux_mask);
-extern int aml_pinmux_clr(unsigned int mux_index, unsigned int mux_mask);
+	extern int aml_pinmux_set ( unsigned int mux_index, unsigned int mux_mask );
+	extern int aml_pinmux_clr ( unsigned int mux_index, unsigned int mux_mask );
 #endif
 
 #endif // GPIO_H

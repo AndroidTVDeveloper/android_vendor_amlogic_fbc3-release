@@ -96,19 +96,19 @@ struct fbc_i2c {
 };
 
 struct i2c_ops {
-     void (*xfer_prepare)(struct fbc_i2c *i2c);
-	 int  (*do_address)(struct fbc_i2c *i2c, unsigned int addr);
-	 int  (*read)(struct fbc_i2c *i2c, unsigned char *buf, unsigned int len);
-	 int  (*write)(struct fbc_i2c *i2c, unsigned char *buf, unsigned int len);
-	 void (*stop)(struct fbc_i2c *i2c);
+	void ( *xfer_prepare ) ( struct fbc_i2c *i2c );
+	int  ( *do_address ) ( struct fbc_i2c *i2c, unsigned int addr );
+	int  ( *read ) ( struct fbc_i2c *i2c, unsigned char *buf, unsigned int len );
+	int  ( *write ) ( struct fbc_i2c *i2c, unsigned char *buf, unsigned int len );
+	void ( *stop ) ( struct fbc_i2c *i2c );
 };
 
-int i2c_transfer(struct fbc_i2c *i2c, struct i2c_msg *msgs, int num);
+int i2c_transfer ( struct fbc_i2c *i2c, struct i2c_msg *msgs, int num );
 
-int codec_read_byte(unsigned addr, unsigned char reg_addr, unsigned char *data);
-int codec_write_byte(unsigned addr, unsigned char reg_addr, unsigned char data);
+int codec_read_byte ( unsigned addr, unsigned char reg_addr, unsigned char *data );
+int codec_write_byte ( unsigned addr, unsigned char reg_addr, unsigned char data );
 
-int codec_write(unsigned addr, unsigned char r_addr, unsigned char *buf, unsigned len);
-int codec_read(unsigned addr, unsigned char r_addr, unsigned char *buf, unsigned len);
+int codec_write ( unsigned addr, unsigned char r_addr, unsigned char *buf, unsigned len );
+int codec_read ( unsigned addr, unsigned char r_addr, unsigned char *buf, unsigned len );
 
 #endif //__FBC_I2C_H__

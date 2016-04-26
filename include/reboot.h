@@ -18,29 +18,29 @@
 #define SEC_BOOT_STAGE				0x2
 #define MAIN_STAGE					0x3
 
-int reboot(unsigned reson);
+int reboot ( unsigned reson );
 unsigned get_boot_flag();
-int set_boot_flag(unsigned int num);
+int set_boot_flag ( unsigned int num );
 unsigned get_boot_stage();
-int set_boot_stage(unsigned int stage);
+int set_boot_stage ( unsigned int stage );
 
 void reset_spi();
 void reset_iosc();
 void reset_ir();
 void reset_ee();
-int reboot_sw(unsigned reson);
+int reboot_sw ( unsigned reson );
 
 int reset_watchdog();	//feed the dog
 int enable_watchdog();
 int enable_watchdog_interrupt();
 int disable_watchdog();
 int disable_watchdog_interrupt();
-int set_watchdog_threshold(unsigned short th);
+int set_watchdog_threshold ( unsigned short th );
 unsigned get_watchdog_threshold();
 unsigned get_watchdog_current_count();
-typedef unsigned int (* reboot_timming)();
-void registerRebootTimming(reboot_timming func);
+typedef unsigned int ( * reboot_timming ) ();
+void registerRebootTimming ( reboot_timming func );
 extern void lvds_phy_disable();
-extern void set_vx1_signal_off(void);
+extern void set_vx1_signal_off ( void );
 
 #endif	//__FBC_REBOOT_H__

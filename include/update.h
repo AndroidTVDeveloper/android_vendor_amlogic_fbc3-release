@@ -2,7 +2,7 @@
 #define __UPDATE_H__
 
 #ifndef NULL
-#define NULL	0
+	#define NULL	0
 #endif
 
 #define ERROR						-1
@@ -59,17 +59,17 @@ typedef struct update_ctrl {
 	struct serial_device *serial_dev;
 	struct spi_flash *flash_dev;
 
-	int (*do_backup)(struct update_ctrl *ctrl);
-	int (*do_restore)(struct update_ctrl *ctrl);
-	int (*do_update)(struct update_ctrl *ctrl);
-	int (*do_check)(struct update_ctrl *ctrl);
-	int (*show_progress)(unsigned state, unsigned progress);
-	int (*show_update_msg)(int msg_type, const char *msg);
+	int ( *do_backup ) ( struct update_ctrl *ctrl );
+	int ( *do_restore ) ( struct update_ctrl *ctrl );
+	int ( *do_update ) ( struct update_ctrl *ctrl );
+	int ( *do_check ) ( struct update_ctrl *ctrl );
+	int ( *show_progress ) ( unsigned state, unsigned progress );
+	int ( *show_update_msg ) ( int msg_type, const char *msg );
 } update_ctrl_t;
 
-void init_update_ctrl_t(update_ctrl_t *ctrl);
-int handle_cmd(update_ctrl_t *ctrl);
+void init_update_ctrl_t ( update_ctrl_t *ctrl );
+int handle_cmd ( update_ctrl_t *ctrl );
 
-extern int move_image(struct spi_flash *flash, unsigned s_offs, unsigned b_offs, unsigned size);
+extern int move_image ( struct spi_flash *flash, unsigned s_offs, unsigned b_offs, unsigned size );
 
 #endif

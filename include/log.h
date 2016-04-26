@@ -4,11 +4,11 @@
 #ifdef IN_FBC_MAIN_CONFIG
 
 #ifndef NULL
-#define NULL	0
+	#define NULL	0
 #endif
 
 #ifndef HAS_LOGCAT_FUNCTION
-#define HAS_LOGCAT_FUNCTION		1
+	#define HAS_LOGCAT_FUNCTION		1
 #endif
 
 #define LOG_LEVEL_E		0x0
@@ -49,9 +49,9 @@ typedef struct {
 	unsigned write_index;
 
 	char log_buf[MAX_LOG_BUF_SIZE];
-}LOG_BUF_CTRL_T;
+} LOG_BUF_CTRL_T;
 
-int log_print_to_buffer(int level, int flag, const char *tag, const char * __fmt, ...);
+int log_print_to_buffer ( int level, int flag, const char *tag, const char *__fmt, ... );
 
 #define LOGI(TAG, ...)	log_print_to_buffer(LOG_LEVEL_I, LOG_FLAG_WAKEUP, TAG, __VA_ARGS__)
 #define LOGD(TAG, ...)	log_print_to_buffer(LOG_LEVEL_D, LOG_FLAG_WAKEUP, TAG, __VA_ARGS__)
@@ -81,7 +81,7 @@ int log_print_to_buffer(int level, int flag, const char *tag, const char * __fmt
 
 //#define printf(...) ((void)0)
 
-extern int init_log(void);
+extern int init_log ( void );
 
 #endif IN_FBC_MAIN_CONFIG
 #endif __LOG__

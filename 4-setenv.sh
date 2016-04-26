@@ -6,7 +6,7 @@ if [ -z $TEST ]; then
     export ARC_COMPILER="GNU"
     export ARC_TOOLCHAIN_PATH=$CC_DIR
     echo "Use GNU toolchain for ARC in $ARC_TOOLCHAIN_PATH."
-  else 
+  else
     echo "No compiler for ARC find, please install or add PATH of hcac or aec-elf32-gcc."
   fi
 else

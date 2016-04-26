@@ -23,21 +23,21 @@
 
 #ifdef IN_FBC_MAIN_CONFIG
 
-unsigned long OSTimeGet();
+	unsigned long OSTimeGet();
 
-// return: timer id, fail if id < 0
-int request_timer(int taskid, int count);
+	// return: timer id, fail if id < 0
+	int request_timer ( int taskid, int count );
 
-int release_timer(int id);
+	int release_timer ( int id );
 
 #else
 
-int create_timer(int index, int unit, unsigned count, void (*fn)(void));
-int destory_timer(int index, void (*fn)(void));
+	int create_timer ( int index, int unit, unsigned count, void ( *fn ) ( void ) );
+	int destory_timer ( int index, void ( *fn ) ( void ) );
 
 #endif
 
-extern void init_timer(void);
+extern void init_timer ( void );
 
 
 #endif //TIMER_H

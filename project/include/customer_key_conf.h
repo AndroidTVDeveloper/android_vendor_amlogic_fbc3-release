@@ -4,9 +4,9 @@
 #include <key_const.h>
 
 typedef enum {
-    DECODEMODE_NEC = 0,
-    DECODEMODE_RCA = 1 ,
-    DECODEMODE_TOSHIBA = 2 ,
+	DECODEMODE_NEC = 0,
+	DECODEMODE_RCA = 1 ,
+	DECODEMODE_TOSHIBA = 2 ,
 
 } ddmode_t;
 

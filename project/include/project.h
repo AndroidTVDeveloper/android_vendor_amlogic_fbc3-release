@@ -22,4 +22,8 @@
 #define HDMIRX_HPD_HIGH	1	//for other boards
 #define HDMIRX_HPD_LOW		0	//for T111/112 socket board
 #define HDMIRX_HPD_LVL		HDMIRX_HPD_HIGH
+
+//#define ENABLE_LOCAL_DIMMING
+#define ENABLE_IW7019
+
 #endif
