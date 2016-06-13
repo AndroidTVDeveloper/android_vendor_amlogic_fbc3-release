@@ -3,7 +3,7 @@
 #include <serial.h>
 #include <common.h>
 #include <spi_flash.h>
-#include <spi_regional_division.h>
+#include <relocate.h>
 #include <update.h>
 #include <reboot.h>
 #include <crc.h>
@@ -113,53 +113,6 @@ static int data_stream_read ( update_ctrl_t *update_ctrl )
 	return ret + 1;
 }
 
-int move_image ( struct spi_flash *flash, unsigned s_offs, unsigned b_offs, unsigned size )
-{
-	char buf[SPI_BLOCK_SIZE];
-	char rbbuf[SPI_BLOCK_SIZE];
-	unsigned erase_size = 0;
-	int i = 0, num;
-
-	if ( size % SPI_BLOCK_SIZE != 0 ) {
-		printfx ( "size % 0x1000 != 0\n" );
-		return -1;
-	}
-
-	num = size / SPI_BLOCK_SIZE;
-	printfx ( "num = %d\n", num );
-	/* base = s_offs; */
-	/* for(erase_size = SPI_FLASH_SECTOR_SIZE;
-	 erase_size < size; erase_size += SPI_FLASH_SECTOR_SIZE); */
-	printfx ( "erase_size = 0x%x\n", erase_size );
-
-	/*
-	 if (spi_flash_erase(flash, b_offs, erase_size))
-	 {
-	 printfx("In backup_image erase failed!\n");
-	 return -1;
-	 }
-	 */
-	while ( i < num ) {
-		printfx ( "s_offs = 0x%x, b_offs = 0x%x\n", s_offs, b_offs );
-		spi_flash_erase ( flash, b_offs, SPI_BLOCK_SIZE );
-		spi_flash_read ( flash, s_offs, SPI_BLOCK_SIZE, buf );
-		spi_flash_write ( flash, b_offs, SPI_BLOCK_SIZE, buf );
-		spi_flash_read ( flash, s_offs, SPI_BLOCK_SIZE, rbbuf );
-		int ret = memcmp ( rbbuf, buf, SPI_BLOCK_SIZE );
-
-		if ( ret != 0 ) {
-			printfx ( "write spi error!\n" );
-			return -1;
-		}
-
-		s_offs += SPI_BLOCK_SIZE;
-		b_offs += SPI_BLOCK_SIZE;
-		i++;
-	}
-
-	printfx ( "backup image success!\n" );
-	return 0;
-}
 
 static int parse_cmd_line ( char *line, char *argv[] )
 {
@@ -450,7 +403,8 @@ void init_update_ctrl_t ( update_ctrl_t *update_ctrl )
 	update_ctrl->channel = get_boot_flag();
 	update_ctrl->flag = rc_cmd_state;
 	update_ctrl->buf = ( unsigned char * ) BUF_ADDR;
-	update_ctrl->ext_buf = ( unsigned char * ) EXT_BUF_ADDR;
+	partition_info_t* info = get_partition_info(SECTION_0, PARTITION_UPDATE);
+	update_ctrl->ext_buf = (unsigned char *)(DCCM_BASE + info->data_size);
 	update_ctrl->flash_dev = get_spi_flash_device ( 0 );
 
 	if ( REBOOT_FLAG_UPGRADE1 == update_ctrl->channel || REBOOT_FLAG_LITE_UPGRADE1 == update_ctrl->channel ) {
@@ -465,6 +419,8 @@ void init_update_ctrl_t ( update_ctrl_t *update_ctrl )
 	update_ctrl->do_update = handle_update;
 	update_ctrl->do_check = handle_check;
 	update_ctrl->do_restore = handle_restore;
+#ifndef HAVE_PRO_LOGO
 	update_ctrl->show_update_msg = show_update_msg;
+#endif
 	return;
 }

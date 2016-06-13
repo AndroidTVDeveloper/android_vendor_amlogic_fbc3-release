@@ -34,63 +34,42 @@
 #define HDMI_AUDIO_PACKET_DST           0x08
 #define HDMI_AUDIO_PACKET_HBR           0x09
 
-// Use the following functions to access the HDMIRX modules (TOP, DWC or PHY) by default
-//extern void             hdmirx_wr_only_reg  (unsigned char dev_id, unsigned long addr, unsigned long data);
-//extern unsigned long    hdmirx_rd_reg       (unsigned char dev_id, unsigned long addr);
-//extern void             hdmirx_rd_check_reg (unsigned char dev_id, unsigned long addr, unsigned long exp_data, unsigned long mask);
-//extern void             hdmirx_wr_reg       (unsigned char dev_id, unsigned long addr, unsigned long data);
-//extern void             hdmirx_poll_reg     (unsigned char dev_id, unsigned long addr, unsigned long exp_data, unsigned long mask);
-extern void 			hdmirx_init ( void );
-extern void 			hdmirx_sig_monitor ( void );
-extern void 			hdmirx_cec_monitor ( void );
-extern void 			hdmi_rx_get_cec_cmd ( void );
-extern void				hdmirx_register_channel ( void );
-// HDMIRX repeater configuration
-//extern void             hdmirx_repeater_config (unsigned long bstatus, unsigned short *ksv);
+#define HDMI_HPD_LOW		0
+#define HDMI_HPD_HIGH		1
+#define HDMI_HPD_INPUT		2
 
-//extern void             aocec_poll_reg_busy (unsigned char reg_busy);
-extern void             aocec_wr_only_reg ( unsigned long addr, unsigned long data );
-extern unsigned long    aocec_rd_reg ( unsigned long addr, unsigned int check_busy_high );
-extern void             aocec_rd_check_reg ( unsigned long addr, unsigned long exp_data, unsigned long mask, unsigned int check_busy_high );
-extern void             aocec_wr_reg ( unsigned long addr, unsigned long data );
-extern void             aocec_wr_reg_fast ( unsigned long addr, unsigned long data );
-extern void				hdmirx_set_DPLL ( int lvl );
-extern void 			hdmirx_DPLL_reset ( void );
-extern void 			hdmirx_audio_fifo_rst ( void );
-extern void 			hdmirx_CDR_reset ( void );
+#define PANEL_OUTMD_LVDS	0
+#define PANEL_OUTMD_VBO	1
 
-extern void 			HDMIRX_IRQ_Handle ( void *arg );
-extern void 			hdmirx_config ( void );
-extern void 			hdmirx_phy_init ( void );
-#ifdef ENABLE_AVMUTE_CONTROL
-	extern void 			clr_avmute ( int en );
-	extern int avmute_count;
-#endif
-// Internal functions:
-void            hdmirx_wr_only_top  ( unsigned long addr, unsigned long data );
-void            hdmirx_wr_only_dwc  ( unsigned long addr, unsigned long data );
-//void            hdmirx_wr_only_phy  (unsigned long addr, unsigned long data);
-unsigned long   hdmirx_rd_top       ( unsigned long addr );
-unsigned long   hdmirx_rd_dwc       ( unsigned long addr );
-//unsigned long   hdmirx_rd_phy       (unsigned long addr);
-//void            hdmirx_rd_check_top (unsigned long addr, unsigned long exp_data, unsigned long mask);
-void            hdmirx_rd_check_dwc ( unsigned long addr, unsigned long exp_data, unsigned long mask );
-//void            hdmirx_rd_check_phy (unsigned long addr, unsigned long exp_data, unsigned long mask);
-void            hdmirx_wr_top       ( unsigned long addr, unsigned long data );
-void            hdmirx_wr_dwc       ( unsigned long addr, unsigned long data );
-//void            hdmirx_wr_phy       (unsigned long addr, unsigned long data);
-//void            hdmirx_poll_top     (unsigned long addr, unsigned long exp_data, unsigned long mask);
-//void            hdmirx_poll_dwc     (unsigned long addr, unsigned long exp_data, unsigned long mask, unsigned long max_try);
-//void            hdmirx_poll_phy     (unsigned long addr, unsigned long exp_data, unsigned long mask);
-void            hdmirx_key_setting  (   unsigned char           encrypt_en );
+enum tvin_hdr_eotf_e {
+	EOTF_SDR,
+	EOTF_HDR,
+	EOTF_SMPTE_ST_2048,
+	EOTF_MAX,
+};
 
-int 			hdmi_rx_phy_pll_lock ( void );
-int 			hdmi_rx_audio_pll_lock ( void );
-extern int 			hdmirx_get_clock ( int index );
-int 			hdmirx_get_tmds_clock ( void );
-void 			hdmirx_phy_init ( void );
-void 			hdmirx_audio_control ( char enable );
-extern void hdmirx_phy_init ( void );
+enum tvin_hdr_state_e {
+	HDR_STATE_OLD,
+	HDR_STATE_READ,
+	HDR_STATE_NEW,
+};
+
+struct tvin_hdr_property_s {
+	unsigned int x;/* max */
+	unsigned int y;/* min */
+};
+
+struct tvin_hdr_data_s {
+	enum tvin_hdr_eotf_e eotf:8;
+	unsigned char metadata_id;
+	unsigned char lenght;
+	enum tvin_hdr_state_e data_status:8;
+	struct tvin_hdr_property_s primaries[3];
+	struct tvin_hdr_property_s white_points;
+	struct tvin_hdr_property_s master_lum;/* max min lum */
+	unsigned int mcll;
+	unsigned int mfall;
+};
 
 extern unsigned int    dpll_ctr2;
 extern unsigned int    dpll_ctr[6];
@@ -120,6 +99,70 @@ extern int enable_10bit;
 extern int clk_divider;
 extern int enable_10bit_input;
 extern int pll_rst_counter;
+
+// Use the following functions to access the HDMIRX modules (TOP, DWC or PHY) by default
+//extern void             hdmirx_wr_only_reg  (unsigned char dev_id, unsigned long addr, unsigned long data);
+//extern unsigned long    hdmirx_rd_reg       (unsigned char dev_id, unsigned long addr);
+//extern void             hdmirx_rd_check_reg (unsigned char dev_id, unsigned long addr, unsigned long exp_data, unsigned long mask);
+//extern void             hdmirx_wr_reg       (unsigned char dev_id, unsigned long addr, unsigned long data);
+//extern void             hdmirx_poll_reg     (unsigned char dev_id, unsigned long addr, unsigned long exp_data, unsigned long mask);
+extern void hdmirx_fsm_init(void);
+extern void hdmirx_fsm_to_unstable(void);
+extern void 			hdmirx_init ( void );
+extern void 			hdmirx_sig_monitor ( void );
+extern void 			hdmirx_cec_monitor ( void );
+extern void 			hdmi_rx_get_cec_cmd ( void );
+extern void				hdmirx_register_channel ( void );
+// HDMIRX repeater configuration
+//extern void             hdmirx_repeater_config (unsigned long bstatus, unsigned short *ksv);
+
+//extern void             aocec_poll_reg_busy (unsigned char reg_busy);
+extern void             aocec_wr_only_reg ( unsigned long addr, unsigned long data );
+extern unsigned long    aocec_rd_reg ( unsigned long addr, unsigned int check_busy_high );
+extern void             aocec_rd_check_reg ( unsigned long addr, unsigned long exp_data, unsigned long mask, unsigned int check_busy_high );
+extern void             aocec_wr_reg ( unsigned long addr, unsigned long data );
+extern void             aocec_wr_reg_fast ( unsigned long addr, unsigned long data );
+extern void				hdmirx_set_DPLL ( int lvl );
+extern void 			hdmirx_DPLL_reset ( void );
+extern void 			hdmirx_audio_fifo_rst ( void );
+extern void 			hdmirx_CDR_init ( void );
+extern void hdmirx_cdr_reset ( void );
+extern void 			HDMIRX_IRQ_Handle ( void *arg );
+extern void 			hdmirx_config ( void );
+extern void 			hdmirx_phy_init ( void );
+#ifdef ENABLE_AVMUTE_CONTROL
+	extern void 			hdmi_avmute ( int en );
+	extern int avmute_count;
+#endif
+// extern void hdmirx_avmute ( int en );
+// Internal functions:
+void            hdmirx_wr_only_top  ( unsigned long addr, unsigned long data );
+void            hdmirx_wr_only_dwc  ( unsigned long addr, unsigned long data );
+//void            hdmirx_wr_only_phy  (unsigned long addr, unsigned long data);
+unsigned long   hdmirx_rd_top       ( unsigned long addr );
+unsigned long   hdmirx_rd_dwc       ( unsigned long addr );
+//unsigned long   hdmirx_rd_phy       (unsigned long addr);
+//void            hdmirx_rd_check_top (unsigned long addr, unsigned long exp_data, unsigned long mask);
+void            hdmirx_rd_check_dwc ( unsigned long addr, unsigned long exp_data, unsigned long mask );
+//void            hdmirx_rd_check_phy (unsigned long addr, unsigned long exp_data, unsigned long mask);
+void            hdmirx_wr_top       ( unsigned long addr, unsigned long data );
+void            hdmirx_wr_dwc       ( unsigned long addr, unsigned long data );
+//void            hdmirx_wr_phy       (unsigned long addr, unsigned long data);
+//void            hdmirx_poll_top     (unsigned long addr, unsigned long exp_data, unsigned long mask);
+//void            hdmirx_poll_dwc     (unsigned long addr, unsigned long exp_data, unsigned long mask, unsigned long max_try);
+//void            hdmirx_poll_phy     (unsigned long addr, unsigned long exp_data, unsigned long mask);
+void            hdmirx_key_setting  (   unsigned char           encrypt_en );
+
+int 			hdmi_rx_phy_pll_lock ( void );
+int 			hdmi_rx_audio_pll_lock ( void );
+extern int 			hdmirx_get_clock ( int index );
+int 			hdmirx_get_tmds_clock ( void );
+void 			hdmirx_phy_init ( void );
+void 			hdmirx_audio_control ( char enable );
+extern void hdmirx_phy_init ( void );
+int drm_handler(void);
+void hdmirx_get_hdr_property(struct tvin_hdr_data_s *hdr_data);
+
 //------------------------------------------------------------------------------
 // Defines for simulation
 //------------------------------------------------------------------------------

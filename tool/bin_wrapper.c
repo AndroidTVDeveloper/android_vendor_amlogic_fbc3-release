@@ -32,7 +32,7 @@ struct magic_t {
 	unsigned magic;
 };
 
-static struct magic_t w_magic[6] = {
+static struct magic_t w_magic[7] = {
 	{"COMPLETE_BIN", COMPLETE_SPI_MAGIC},
 	{"BOOT_BIN", BOOT_SPI_MAGIC},
 	{"MAIN_CODE_BIN", MAIN_CODE_SPI_MAGIC},

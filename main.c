@@ -15,7 +15,6 @@
 #include <panel.h>
 #include <reboot.h>
 #include <user_setting.h>
-
 #include <ui.h>
 #include <sar_adc.h>
 #include <vpp.h>
@@ -24,7 +23,12 @@
 #include <hdmirx.h>
 #include <vpu_util.h>
 #include <project.h>
-#include <iw7019.h>
+#include <v_protocol.h>
+#include <board_config.h>
+
+#ifdef ENABLE_LOCAL_DIMMING
+	#include <ldim_drv.h>
+#endif
 
 #define __TEST_RUNNING_ON_SPI_CODE__
 /* #define CLK_TEST */
@@ -41,6 +45,8 @@ void __attribute__ ( ( section ( ".running.on.spi" ) ) ) test_section_attr()
 
 static const char TAG[] = "main";
 
+extern int i2s_audio_init ( void );
+
 /* static __attribute__((section("check.info")))
  char check_info[CHECK_INFO_SIZE]="xxxxxxxxxxxxxxxxx"; */
 
@@ -50,6 +56,7 @@ int main ( int argc, char *argv[] )
 	int cur_id = 0;
 	int tmp_val = 0;
 	/* lvds_phy_disable(); */
+	init_configures();
 	reset_watchdog();
 	printf ( "%s\n\n", FBC_BOOT_VERSION );
 	set_boot_stage ( MAIN_STAGE );
@@ -58,6 +65,7 @@ int main ( int argc, char *argv[] )
 	printf ( "Power on.\n" );
 	power_on_aml();
 	printf ( "Enter main.\n" );
+
 	p = calloc ( 1024, 1 );
 	printf ( "calloc returned %x\n", ( unsigned ) p );
 
@@ -78,9 +86,11 @@ int main ( int argc, char *argv[] )
 	InitTask();
 	printf ( "Init uart.\n" );
 	console_enable();
-	printf ( "Init uart communication task.\n" );
-	uart_communication_task_init();
-	printf ( "Init log.\n" );
+
+	printf("v_protocol_init\n");
+	v_protocol_init();
+
+	printf("Init log.\n");
 	init_log();
 	printf ( "Init user setting.\n" );
 	init_setting_task();
@@ -94,10 +104,11 @@ int main ( int argc, char *argv[] )
 	 (* (volatile unsigned long *)0x80030628)); */
 	printf ( "Init Display.\n" );
 	init_display();
-	printf ( "Init OSD.\n" );
-	init_ui();
 	printf ( "Init Vpp.\n" );
 	init_vpp();
+	printf ( "Init OSD.\n" );
+	init_ui();
+	card_system_pw();
 #ifdef ENABLE_LOCAL_DIMMING
 	printf ( "Init ldim.\n" );
 	init_ldim();
@@ -105,11 +116,16 @@ int main ( int argc, char *argv[] )
 	/* printf("set bri con sat hue & wb.\n"); */
 	/* vpu_pq_set(); */
 	/* mdelay(400); */
+#if CONFIG_ENABLE_REMOTE
 	printf ( "Init remote.\n" );
 	remote_init();
 	set_remote_mode ( REMOTE_TYPE );
+#endif
+#if CONFIG_ENABLE_SARADC
 	printf ( "Init saradc.\n" );
 	sar_adc_init();
+#endif
+
 	printf ( "Init i2s audio\n" );
 	int ret = i2s_audio_init();
 
@@ -124,52 +140,16 @@ int main ( int argc, char *argv[] )
 	/* led_bl_level_set(128); */
 	printf ( "Start Vpp.\n" );
 	start_vpp();
-#ifdef ENABLE_IW7019
-	printf ( "Init spi local dimming.\n" );
-	spi_local_dimming_task_init();
-#endif
+
 #ifdef ENABLE_AUTO_BACKLIGHT
 	printf ( "Start auto_backlight\n" );
 	opc_task_init();
 #endif
-	printf ( "Init key func\n" );
-	registKeyProcess ( KeyFunc );
-	/* printf("panel_resume\n"); */
-	/* panel_resume(); */
-	/*  int i = 0;
-	 unsigned *pp = (unsigned *)0x8002f000;
-	 for (i = 0; i < 64; i++)
-	 {
-	 *pp = 0x0;
-	 pp++;
-	 }
-	 for (i = 0; i < 64; i++)
-	 {
-	 *pp = 0xffffffff;
-	 pp++;
-	 }
-	 for (i = 0; i < 64; i++)
-	 {
-	 *pp = 0xa5a5a5a5;
-	 pp++;
-	 }
-	 for (i = 0; i < 64; i++)
-	 {
-	 *pp = 0x5a5a5a5a;
-	 pp++;
-	 }
-	 */
-	/*printf("register mask 0  0x%8x\n", Rd(INTR_MASK_0));
-	 printf("register int sel 0 0x%8x\n", Rd(INTR_FIRQ_SEL_0));
-	 printf("register timemux 0x%8x\n", Rd(TIMER_MUX));
-	 //printf("register int clr 0 0x%8x\n", Rd(INTR_STAT_CLR_0));
-	 printf("register int stat 0 0x%8x\n", Rd(INTR_STAT_0));
-	 printf("register timera counter 0x%8x\n", Rd(TIMERA));
-	 printf("register timerb counter 0x%8x\n", Rd(TIMERB));
-	 printf("register timerc counter 0x%8x\n", Rd(TIMERC));
-	 printf("register timerd counter 0x%8x\n", Rd(TIMERD));
-	 printf("register timere counter 0x%8x\n", Rd(TIMERE)); */
-	printf ( "Enter task main loop.\n" );
+
+	printf("Init key func\n");
+	registKeyProcess(KeyFunc);
+
+	printf("Enter task main loop.\n");
 #ifdef CLK_TEST
 	printf
 	( "**********************clock**********************************\n" );

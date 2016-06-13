@@ -196,7 +196,7 @@ extern void fbc_demura_load_table ( demura_lutidx_t table_index, int *data, int 
 extern void fbc_dynamic_contrast_enable ( int enable );
 extern void fbc_backlight_enable ( int enable );
 extern int fbc_backlight_status ( void );
-extern void fbc_switch_to_hdmi ( int enable );
+//extern void fbc_switch_to_hdmi ( int enable );
 extern void fbc_set_gamma ( int index );
 extern int fbc_get_gamma ( void );
 extern void fbc_adj_bri ( unsigned int bri_ui );
@@ -213,6 +213,6 @@ extern void Spread_spectrum ( int mode );
 extern void lvds_com_set ( unsigned int val );
 extern int fbc_system_pwm_set ( vpu_pwm_channel_set_t pwm_set );
 extern void fbc_lockn_set ( int enable );
-extern char fbc_hdmirx_5v_power ( void );
+//extern char fbc_hdmirx_5v_power ( void );
 #endif
 

@@ -3,6 +3,9 @@
 #include <command.h>
 #include <user_setting.h>
 #include <spi_flash.h>
+#include <board_config.h>
+
+extern int isprint ( int c );
 
 int do_cri ( cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[] )
 {
@@ -236,7 +239,8 @@ int do_cri ( cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[] )
 				printf ( "can't erase code area!!!\n" );
 			}
 
-			return 0;
+			//return 0;
+/*
 			tmp_buf = ( unsigned char * ) malloc ( tmp_len );
 
 			if ( tmp_buf != NULL ) {
@@ -257,6 +261,7 @@ int do_cri ( cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[] )
 			}
 
 			return 0;
+*/
 		}
 	}
 

@@ -16,11 +16,15 @@
 #include <stdlib.h>
 
 #include <version.h>
+#include <board_config.h>
+#ifdef CONFIG_CUSTOMER_PROTOCOL
+#include <handle_cmd.h>
+#endif
+LIST_HEAD ( dbg_list );
+int dbg_task_id = -1;
 
-static LIST_HEAD ( dbg_list );
-static int dbg_task_id = -1;
-
-static int check_cmd_is_supported ( int cmd )
+#ifndef CONFIG_CUSTOMER_PROTOCOL
+static int check_dbg_cmd_is_supported ( int cmd )
 {
 	switch ( cmd ) {
 		case FBC_USER_SETTING_DEFAULT:
@@ -440,10 +444,11 @@ static int ConsoleHandler ( int task_id, void *param )
 
 	return 0;
 }
+#endif//CONFIG_CUSTOMER_PROTOCOL
 
 void dbg_task_init ( void )
 {
 	dbg_task_id = RegisterTask ( ConsoleHandler, NULL, 0, TASK_PRIORITY_DBG );
-	RegisterCmd ( &dbg_list, dbg_task_id, INPUT_CEC | INPUT_UART_HOST | INPUT_UART_CONSOLE, check_cmd_is_supported, handle_dbg_cmd );
+	RegisterCmd ( &dbg_list, dbg_task_id, INPUT_CEC | INPUT_UART_HOST | INPUT_UART_CONSOLE, check_dbg_cmd_is_supported, handle_dbg_cmd );
 	return;
 }

@@ -56,7 +56,7 @@ int debug_console ( struct serial_device *dev );
 
 #ifdef IN_FBC_MAIN_CONFIG
 extern void dbg_task_init ( void );
-extern void uart_communication_task_init ( void );
+extern void ref_protocol_init ( void );
 extern int test_running_spi_code ( int x );
 extern int pq_cmd_flag;
 #else
@@ -67,7 +67,6 @@ extern "C"
 	int printfx ( const char *__fmt, ... );
 }
 
-extern int check_image_info ( unsigned h_addr, unsigned t_addr );
 extern int show_update_msg ( int msg_type, const char *msg );
 #endif
 
@@ -91,7 +90,6 @@ extern int default_uart;
 extern void serial_putc ( const char c );
 
 extern struct audio_control audio_state;
-extern unsigned int audio_handle_cmd ( unsigned char *s, int *rets );
 
 
 #endif

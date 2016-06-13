@@ -161,6 +161,38 @@ FBC_BOOT_CMD (
 	"i2c -w addr reg value [value...] ---- i2c write.\n"
 );
 
+extern int do_backlight_debug ( cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[] );
+FBC_BOOT_CMD (
+	bl,	10,	0,	do_backlight_debug,
+	"bl",
+	"bl power [value]        ---- 0=power off, 1=power on.\n"
+	"bl set [level]          ---- set backlight level(0~255).\n"
+	"bl get                  ---- get backlight level.\n"
+	"bl status               ---- print bl status.\n"
+	"bl bypass [value]       ---- 0=bypass disable, 1=bypass enable.\n"
+	"bl pwm duty [value]     ---- set pwm duty(0~100), unit: hz.\n"
+	"bl pwm freq [value]     ---- set pwm frequency(unit: Hz).\n"
+	"bl pwm pol [value]      ---- set pwm pol: 0=negative, 1=positive.\n"
+);
+
+extern int do_panel_debug ( cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[] );
+FBC_BOOT_CMD (
+	lcd,	10,	0,	do_panel_debug,
+	"lcd",
+	"lcd enable [value]        ---- 0=disable, 1=enable.\n"
+	"lcd test [num]            ---- show vpu bist pattern, 0=disable, 1~7=different pattern.\n"
+	"lcd reset                 ---- reset panel.\n"
+	"lcd ss [level]            ---- set clk spread spectrum, 0=disable, 1~5=different level.\n"
+	"lcd phy [vswing] [preem]  ---- set phy vswing(0~7) & preemphasis(0~7)\n"
+	"lcd lvds [repack] [dual_port] [pn_swap] [port_swap]     ---- set lvds config.\n"
+	"lcd vbyone [lane_count] [region_num] [byte_mode]        ---- set vbyone config.\n"
+	"lcd info                  ---- print panel info.\n"
+	"lcd reg                   ---- print panel registers.\n"
+	"lcd dump                  ---- print panel info & registers.\n"
+	"lcd debug_print [value]   ---- set panel debug print, 0=disable, 1=enable.\n"
+);
+
+#ifdef ENABLE_IW7019
 extern int do_iw7019_debug ( cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[] );
 FBC_BOOT_CMD (
 	iw7019,	10,	0,	do_iw7019_debug,
@@ -172,6 +204,17 @@ FBC_BOOT_CMD (
 	"iw7019 read [addr]          ---- iw7019 read.\n"
 	"iw7019 test [mode]          ---- iw7019 set test mode.\n"
 );
+#endif
+
+#ifdef ENABLE_IW7027
+extern int do_iw7027_debug ( cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[] );
+FBC_BOOT_CMD (
+	iw7027,	10,	0,	do_iw7027_debug,
+	"",
+	"\n"
+	"iw7027 trans          ---- dump iw7027 transfer spi data.\n"
+);
+#endif
 
 #ifdef ENABLE_LOCAL_DIMMING
 extern int do_ldim_debug ( cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[] );
@@ -179,12 +222,19 @@ FBC_BOOT_CMD (
 	ldim,	10,	0,	do_ldim_debug,
 	"",
 	"ldim dump [value] [value]---- dump ldim stts_max_matrix.\n"
-	"ldim stts	[value]---- ldim stts config.\n"
+	"ldim stts [value]---- ldim stts config 0,1,2,3,4,5.\n"
 	"ldim write [addr] [value] ---- ldim write.\n"
-	"ldim read	[addr] ---- ldim read.\n"
-	"ldim remap [value] ---- ldim remapping mode.\n"
+	"ldim read [addr] ---- ldim read.\n"
+	"ldim remap [value] ---- ldim remapping mode 0/1.\n"
+	"ldim enable [value] ---- ldim enable or disable FW and REMAPPING.\n"
+	"ldim test_mode [value] ---- ldim test_mode 0/1.\n"
+	"ldim test_set [value] [value] ---- ldim test_set blk_index blk_brightness.\n"
+	"ldim test_set_all [value] ---- ldim test_set_all blk_brightness.\n"
+	"ldim brightness ---- dump system brightness & ldim spi data.\n"
+	"ldim debug_print [value] ---- enable or disable ldim debug print.\n"
 );
 #endif
+
 extern int do_cri ( cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[] );
 FBC_BOOT_CMD (
 	cri,	10,	0,	do_cri,
@@ -231,11 +281,19 @@ cmd_tbl_t *default_cmd[] = {
 	GET_CMD_ADDR_FROM_CNAME ( reboot ), \
 	GET_CMD_ADDR_FROM_CNAME ( sf ), \
 	GET_CMD_ADDR_FROM_CNAME ( i2c ), \
-	GET_CMD_ADDR_FROM_CNAME ( iw7019 ), \
-	GET_CMD_ADDR_FROM_CNAME ( cri ),
+	GET_CMD_ADDR_FROM_CNAME ( cri ), \
+	GET_CMD_ADDR_FROM_CNAME ( bl ), \
+	GET_CMD_ADDR_FROM_CNAME ( lcd ),
 #ifdef ENABLE_LOCAL_DIMMING
 	GET_CMD_ADDR_FROM_CNAME ( ldim ),
 #endif
+#ifdef ENABLE_IW7019
+	GET_CMD_ADDR_FROM_CNAME ( iw7019 ),
+#endif
+#ifdef ENABLE_IW7027
+	GET_CMD_ADDR_FROM_CNAME ( iw7027 ),
+#endif
+
 };
 #else
 cmd_tbl_t *default_cmd[] = {

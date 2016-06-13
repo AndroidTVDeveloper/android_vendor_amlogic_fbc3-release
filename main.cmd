@@ -15,11 +15,11 @@ SECTIONS {
     _TEXT_END = .;
   } > CODE_MEM
   GROUP: {
-	.running.on.spi ADDR(0x410A5000) : {}
+	.running.on.spi ADDR(0x410A6000) : {}
 	.spi.text : { test_running_spi.o (.text) }
   } > ROM
   GROUP: {
-    .rodata ADDR(0x410B5000) SIZE(180K): {}
+    .rodata ADDR(0x410B6000) SIZE(180K): {}
   } > ROM
   GROUP: {
     .data: { *(.data) }

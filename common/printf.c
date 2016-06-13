@@ -293,7 +293,7 @@ static int skip_atoi ( const char **s )
 	return i;
 }
 
-static unsigned int strnlen ( const char *s, unsigned int count )
+unsigned int strnlen ( const char *s, unsigned int count )
 {
 	const char *sc;
 
@@ -301,6 +301,23 @@ static unsigned int strnlen ( const char *s, unsigned int count )
 		/* nothing */;
 
 	return sc - s;
+}
+
+void stringcopy(const char *s,char *d)
+{
+	int i;
+
+	i = 0 ;
+	while ( s[i] != '\0' )
+	{
+		d[i] = s[i] ;
+		i += 1 ;
+		if ( i > 255 ) {
+			//buffer overflow
+			break;
+		}
+	}
+	d[i] = '\0';
 }
 
 static char *string ( char *buf, char *s, int field_width, int precision, int flags )

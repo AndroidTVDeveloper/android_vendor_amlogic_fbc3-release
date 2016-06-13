@@ -22,8 +22,10 @@
 *	If external codec driver is registed in system, internal codec drivers is disable.
 * 	When no external codec driver, choice audio codec name below.
 */
-#define TAS5707		0
-#define TAS5711		1
+#define CODEC_NONE  0
+#define TAS5707		1
+#define TAS5711		2
+#define TAS5766		3
 #define CODEC_NAME	TAS5707
 
 //Don't change the structs.
@@ -46,6 +48,7 @@ struct codec_control {
 	int ( *set_EQ_mode ) ( unsigned char );
 	int ( *set_user_parameters ) ( unsigned char * );
 	int ( *set_fine_volume ) ( unsigned char );
+	int ( *set_dac_vol )( unsigned char );
 };
 
 /*codec state*/
@@ -81,7 +84,6 @@ struct audio_control {
 
 
 void register_audio_save ( save_parameter func );
-
 
 extern void RigisterAudioProcess ( struct audio_effect *ptr );
 extern void RegisterCodec ( struct codec_control *ptr );

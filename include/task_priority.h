@@ -21,6 +21,7 @@
 #define TASK_PRIORITY_BURN                  9
 #define TASK_PRIORITY_OPC					21
 #define TASK_PRIORITY_HDMIRX				22
+#define TASK_PRIORITY_LOCAL_DIMING			20
 
 #endif
 

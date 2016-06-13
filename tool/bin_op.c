@@ -11,8 +11,9 @@ that is stored on spi.
 #include <sys/types.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <board_config.h>
 
-#define CC_MAX_BIN_FILE_SIZE    (2 * 1024 * 1024)
+#define CC_MAX_BIN_FILE_SIZE    CONFIG_SPI_SIZE
 
 #define CC_PROJECT_ID_OFFSET    (USER_CRI_DATA_START)
 #define CC_DEVICE_ID_OFFSET     (USER_CRI_DATA_START + 128)
@@ -144,7 +145,7 @@ static int readOneBinFile ( const char *file_name, unsigned char data_buf[],
 	}
 
 	fseek ( fp, 0, SEEK_SET );
-	rd_len = fread ( data_buf, 1, rd_len, fp );
+	rd_len = fread ( data_buf, rd_len, 1, fp );
 	fclose ( fp );
 	fp = NULL;
 	return rd_len;
@@ -166,7 +167,7 @@ static int writeOneBinFile ( const char *file_name, unsigned char data_buf[],
 		return 0;
 	}
 
-	wr_len = fwrite ( data_buf, 1, wr_len, fp );
+	wr_len = fwrite ( data_buf, wr_len, 1, fp );
 	fflush ( fp );
 	fclose ( fp );
 	fp = NULL;
@@ -355,30 +356,30 @@ int main ( int argc, char **argv )
 		}
 
 	} else if ( strcasecmp ( type, "all" ) == 0 ) {
-		getcwd ( cur_path, 512 );
-		strcpy ( cmd_buf, "cat " );
-		strcpy ( tmp_path, cur_path );
-		strcat ( tmp_path, "/" );
-		strcat ( tmp_path, "spi.bin" );
-		strcat ( cmd_buf, tmp_path );
-		strcat ( cmd_buf, " " );
-		strcpy ( tmp_path, cur_path );
-		strcat ( tmp_path, "/" );
-		strcat ( tmp_path, if_path );
-		strcat ( cmd_buf, tmp_path );
-		strcpy ( ouput_path, cur_path );
-		strcat ( ouput_path, "/" );
-		strcat ( ouput_path, of_path );
-		strcat ( cmd_buf, " >> " );
-		strcat ( cmd_buf, ouput_path );
-		puts ( cmd_buf );
-		system ( cmd_buf );
+//		getcwd ( cur_path, 512 );
+//		strcpy ( cmd_buf, "cat " );
+//		strcpy ( tmp_path, cur_path );
+//		strcat ( tmp_path, "/" );
+//		strcat ( tmp_path, "spi.bin" );
+//		strcat ( cmd_buf, tmp_path );
+//		strcat ( cmd_buf, " " );
+//		strcpy ( tmp_path, cur_path );
+//		strcat ( tmp_path, "/" );
+//		strcat ( tmp_path, if_path );
+//		strcat ( cmd_buf, tmp_path );
+//		strcpy ( ouput_path, cur_path );
+//		strcat ( ouput_path, "/" );
+//		strcat ( ouput_path, of_path );
+//		strcat ( cmd_buf, " >> " );
+//		strcat ( cmd_buf, ouput_path );
+//		puts ( cmd_buf );
+//		system ( cmd_buf );
 		data_buf = ( unsigned char * ) malloc ( CC_MAX_BIN_FILE_SIZE );
 
 		if ( data_buf != NULL ) {
 			memset ( ( void * ) data_buf, 0, CC_MAX_BIN_FILE_SIZE );
-			rd_len = getFileSize ( ouput_path );
-			readOneBinFile ( ouput_path, data_buf, rd_len );
+			rd_len = getFileSize ( if_path );
+			readOneBinFile ( if_path, data_buf, rd_len );
 			/* handle project id */
 			tmp_val = PROJECT_ID;
 			tmp_crc = crc32 ( 0, ( unsigned char * ) &tmp_val, 4 );
@@ -400,8 +401,7 @@ int main ( int argc, char **argv )
 			memcpy ( ( void * ) ( data_buf + CC_DEVICE_ID_OFFSET + 12 ),
 					 ( void * ) PANEL_MODULE, tmp_val );
 			/* write data to the bin file */
-			writeOneBinFile ( ouput_path, data_buf,
-							  FBC_USER_START + FBC_USER_SIZE );
+			writeOneBinFile ( of_path, data_buf, CC_MAX_BIN_FILE_SIZE );
 			free ( data_buf );
 			data_buf = NULL;
 		}

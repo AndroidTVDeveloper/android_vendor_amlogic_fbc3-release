@@ -10,9 +10,9 @@ int send_key_to_soc = 1;
 
 int send_key_to_local_task = 1;
 
-int send_remote_to_soc = 1;
+int send_remote_to_soc = 0;
 
-int send_remote_to_local_task = 1;
+int send_remote_to_local_task = 0;
 
 int CUSTOMER_REMOTE_NUMS = 53;
 

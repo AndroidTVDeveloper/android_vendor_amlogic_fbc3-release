@@ -6,15 +6,32 @@ else
   endif
 endif
 
+include ../project/$(board)/config.mk
+
+ifeq ($(CONFIG_LOCAL_DIMMING), 1)
+    CC_FLAGS += -DENABLE_LOCAL_DIMMING
+endif
+
+ifeq ($(ENABLE_IW7019_CTRL), 1)
+    CC_FLAGS += -DENABLE_IW7019
+endif
+
+ifeq ($(ENABLE_IW7027_CTRL), 1)
+    CC_FLAGS += -DENABLE_IW7027
+endif
+
+ifeq ($(CONFIG_HAVE_PRO_LOGO), 1)                                                          
+    CC_FLAGS += -DHAVE_PRO_LOGO                                                            
+endif 
+
 LD_LIB_PATH=$(ARC_TOOLCHAIN_PATH)/../lib/a6
 LD_PRE_BOOT_PATH=preboot
 LITE_CONF_HFILE=lite_conf.h
 CC_FLAGS+= -I./../include/vpp/
+CC_FLAGS+= -I./../project/include/$(board)
 CC_FLAGS+= -I./../project/include/
-CC_FLAGS += -DBOOT_DEBUG_VERSION=$(BOOT_DEBUG_VERSION)
-CC_FLAGS += -DPROJECT_ID=$(PANEL_ID)
-CC_FLAGS += -DENABLE_AVMUTE_CONTROL=$(ENABLE_AVMUTE_CONTROL)
-CC_FLAGS += -DUSER_CRI_DATA_START=$(USER_CRI_DATA_START)
+
+
 ASM_FLAGS+= -I./../include/vpp/
 ASM_FLAGS+= -I./../project/include/
 
@@ -49,32 +66,26 @@ OBJS     = $(SSRCS:%.s=%.o$(SUFFIX)) $(SRCS:%.c=%.o$(SUFFIX))
 
 SUS_SSRCS	 = boot_rom.s
 SUS_SRCS     = suspend.c
+SUS_SRCS    += ../project/$(board)/power.c
+SUS_SRCS    += ../project/$(board)/suspend_power.c
 SUS_SRCS    += ../project/customer_key_conf.c
 SUS_OBJS     = $(SUS_SSRCS:%.s=%.o$(SUFFIX)) $(SUS_SRCS:%.c=%.o$(SUFFIX))
 
 USRCS = update_main.c
 USRCS += update.c
-USRCS += ../project/panel.c
+USRCS += relocate.c
+USRCS += ../project/$(board)/panel.c
+USRCS += ../project/$(board)/power.c
+ifeq ($(CONFIG_LOCAL_DIMMING), 1)
+USRCS += ../project/$(board)/ldim_init.c
+endif
+USRCS += ../project/config.c
 USSRCS = ../driver/vtable.s
 UOBJS = $(USSRCS:%.s=%.o$(SUFFIX)) $(USRCS:%.c=%.o$(SUFFIX))
 
 export CC_FLAGS_ADD
 export ASM_FLAGS_ADD
 export LD_FLAGS_ADD
-
-export_symbols_lib:
-	echo "#ifndef RLINK_H" > ../export_symbols.h
-	echo "#define RLINK_H" >> ../export_symbols.h
-	printf "\textern  const char* switch_p;\n" >> ../export_symbols.h
-	printf "\textern  int bit10_mode;\n" >> ../export_symbols.h
-	echo "#endif" >> ../export_symbols.h
-
-	echo "#include \"export_symbols.h\"" > ../export_symbols.c
-	printf "\n" >> ../export_symbols.c
-	echo "const char* switch_p = \"$(p_switch)\";" >> ../export_symbols.c
-	echo "int bit10_mode = $(BIT10_MODE);" >> ../export_symbols.c
-
-	$(CC) $(CC_FLAGS) ../export_symbols.c -o ../export_symbols.o
 
 all : clean second_boot.elf suspend.elf update.elf
 
@@ -103,7 +114,7 @@ suspend.elf: $(SUS_SOBJS) $(SUS_OBJS) $(SUSPEND_LIB)
 	$(DUMPELF) $(DUMP_FLAGS) $@ > suspend.asm
 
 update.elf: clean_ex2_flags $(UOBJS) $(UPDATE_LIB)
-	$(LD) $(UOBJS) $(UPDATE_LIB) ../export_symbols.o  $(LD_LIB_PATH)/le/crt1.o $(LD_LIB_PATH)/le/crti.o $(LD_FLAGS) update.cmd -lhlt -e _start -o update.elf
+	$(LD) $(UOBJS) $(UPDATE_LIB)  $(LD_LIB_PATH)/le/crt1.o $(LD_LIB_PATH)/le/crti.o $(LD_FLAGS) update.cmd -lhlt -e _start -o update.elf
 	$(DUMPELF) $(DUMP_FLAGS) update.elf > update.asm
 	$(STRIP) $(STRIP_FALGS) update.elf
 	$(OBJCOPY) $(COPY_FLAGS) $@ -o update_code.bin -ctl

@@ -1,8 +1,25 @@
-#ifndef __FBC_RELOCATE_H__
-#define __FBC_RELOCATE_H__
+#ifndef __RELOCATE_H__
+#define __RELOCATE_H__
 
-void copy_data_from_spi_to_sram2 ( int start_addr, int length );
-void copy_code_from_spi_to_ICCM ( int start_addr, int length );
-void copy_data_from_spi_to_DCCM ( int start_addr, int length );
+#include <spi_flash.h>
+#include <spi_regional_division.h>
 
-#endif	//__FBC_RELOCATE_H__
+
+#define ICCM_BASE 0x00000000
+#define ICCM_SIZE 0x20000
+#define DCCM_BASE 0xffff0000
+#define DCCM_SIZE 0x10000
+#define SRAM1_BASE 0x70020000
+#define SRAM2_BASE 0x80020000
+#define SRAM_SIZE 0x10000
+
+extern partition_info_t* get_partition_info(int section, int partition);
+extern int check_image_info(unsigned h_addr, unsigned t_addr);
+//extern int check_partition_info(int section, int partition);
+extern int copy_partition_to_sram2(int section, int partition);
+extern int copy_partition_to_ccm(int section, int partition);
+extern int move_image(struct spi_flash *flash,unsigned s_offs,unsigned b_offs,unsigned size);
+extern int section_backup(struct spi_flash *flash);
+extern int section_restore(struct spi_flash *flash);
+
+#endif

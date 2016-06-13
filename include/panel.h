@@ -1,6 +1,12 @@
 #ifndef PANEL_H
 #define PANEL_H
 
+enum panel_interface_e {
+	PANEL_IF_LVDS = 0,
+	PANEL_IF_VBYONE,
+	PANEL_IF_MAX,
+};
+
 typedef enum panel_format_e {
 	PANEL_NORMAL = 0,
 	PANEL_YUV420,
@@ -36,8 +42,25 @@ typedef enum vpu_timing_e {
 	TIMING_MAX,
 } vpu_timing_t;
 
+enum bl_pwm_channel_e {
+	PWM_PWM0 = 0,
+	PWM_PWM1,
+	PWM_PWM2,
+	PWM_PWM3,
+	PWM_BL_PWM0,
+	PWM_BL_PWM1,
+	PWM_BL_PWM2,
+	PWM_BL_PWM3,
+	PWM_BL_PWM4,
+	PWM_BL_PWM5,
+	PWM_BL_PWM6,
+	PWM_BL_PWM7,
+	PWM_MAX,
+};
+
 
 typedef struct panel_config_s {
+	enum panel_interface_e interface;
 	vpu_outputmode_t output_mode;
 	vpu_timing_t lvds_timing;
 	vpu_timing_t vx1_timing;
@@ -49,12 +72,12 @@ typedef struct panel_config_s {
 
 	unsigned char clk;
 	unsigned char repack;		/* 0:normal, 1,2:repack */
-	unsigned char odd_even;	/* 0:normal, 1:swap */
-	unsigned char hv_invert;	/* invert hs and vs */
-	unsigned char lsb_first;		/* 0:MSB first, 1:LSB first */
-	unsigned char pn_swap;	/* positive and negative swap */
 	unsigned char ports;		/* 0: single port;  1: dual ports */
 	unsigned char bit_size;		/* 0:10bits, 1:8bits, 2:6bits, 3:4bits */
+	unsigned char odd_even;	/* 0:normal, 1:swap */
+	unsigned char pn_swap;	/* positive and negative swap */
+	unsigned char hv_invert;	/* invert hs and vs */
+	unsigned char lsb_first;		/* 0:MSB first, 1:LSB first */
 	unsigned char b_select;		/* 0:R, 1:G, 2:B, 3:0 */
 	unsigned char g_select;		/* 0:R, 1:G, 2:B, 3:0 */
 	unsigned char r_select;		/* 0:R, 1:G, 2:B, 3:0 */
@@ -63,11 +86,9 @@ typedef struct panel_config_s {
 	unsigned char lvds_swap;
 	unsigned char clk_pin_swap;
 
-	unsigned char bl_inverter;   /*  1: inverter backlight pwm   0 : not inverter backlight pwm*/
-
 	int lane_num;
-	int byte_num;
 	int region_num;
+	int byte_num;
 	int color_fmt;
 	/*vx1_lockn_option:
 	-1: register lockn process in function start_vpp();
@@ -77,22 +98,40 @@ typedef struct panel_config_s {
 	int vx1_counter_option;
 
 	/*vx1 lvds combo ctl used by eye chart*/
-	unsigned int vx1_lvds_combo_ctl0;
-	unsigned int vx1_lvds_combo_ctl1;
-	unsigned int vx1_lvds_combo_ctl2;
-	unsigned int vx1_lvds_combo_ctl3;
+	unsigned int vx1_lvds_phy_vswing;
+	unsigned int vx1_lvds_phy_preem;
+	/* clock spread spectrum */
+	unsigned char clk_ss_level;
 
-	unsigned short pwm_duty;   /*  range 0-255*/
-	unsigned short pwm_hz;
+	unsigned char bl_ctrl_method;  /* 1=pwm, 2=ldim */
+	unsigned char bl_pwm_port; /* select pwm channel */
+	unsigned char bl_pwm_pol;   /*  1=positive, 0=negative */
+	unsigned short bl_pwm_hz;
+	unsigned short bl_pwm_duty;   /* default duty */
+	unsigned short bl_pwm_duty_max; /* range 0-255*/
+	unsigned short bl_pwm_duty_min; /* range 0-255*/
+	/* local diming config */
+	unsigned char bl_ldim_mode;  /* 1=single_side(top, bottom, left or right), 2=uniform(top/bottom, left/right) */
+	unsigned char bl_ldim_region_row;
+	unsigned char bl_ldim_region_col;
+	/*unsigned short bl_ldim_mapping[384]; ldim LED location mapping */
+	unsigned char bl_ldim_dev_index;
 
 	unsigned short panel_power_on_delay;
 	unsigned short panel_power_off_delay;
+	unsigned short signal_enable_delay;
+	unsigned short signal_disable_delay;
 	unsigned short pwm_enable_delay;
 	unsigned short pwm_disable_delay;
-	unsigned short clock_enable_delay;
-	unsigned short clock_disable_delay;
 	unsigned short backlight_power_on_delay;
 	unsigned short backlight_power_off_delay;
+
+	unsigned int hdr_support;
+	unsigned int hdr_lumi_max;
+	unsigned int hdr_lumi_min;
+	unsigned int hdr_lumi_avg;
+	unsigned int hdr_primaries[3][2]; /* Rx,y, Gx,y, Bx,y */
+	unsigned int hdr_white_point[2]; /* Wx,y */
 
 	char ManufactureID[2];
 	char ProductID[2];
@@ -162,14 +201,15 @@ int panel_resume ( void );
 void mdelay ( int ms );
 
 void power_on_aml ( void );
-void power_off_aml ( void );
+void card_system_pw(void);
 void panel_power_on_aml ( void );
 void panel_power_off_aml ( void );
 void backlight_power_on_aml ( void );
 void backlight_power_off_aml ( void );
-void set_led_onoff ( unsigned char vcValue );
 
-void get_vx1_lvds_combo_ctl ( unsigned int *ctl0, unsigned int *ctl1, unsigned int *ctl2, unsigned int *ctl3 );
+extern void backlight_power_ctrl(char val);
+extern void backlight_set_level(int level);
+extern int backight_get_level(void);
 
 int get_panel_max_count();
 int get_panel_def_id();
@@ -177,9 +217,6 @@ int get_panel_def_id();
 extern int get_panel_power_on_dly ( void );
 extern void panel_init ( void );
 
-
-
-extern void panel_backlight_power ( char val );
 #define IS_1080P(mode)	((mode == T_1080P50HZ) || \
 						 (mode == T_1080P50HZ44410BIT))
 

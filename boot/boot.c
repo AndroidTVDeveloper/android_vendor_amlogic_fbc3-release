@@ -5,19 +5,19 @@
 #include <relocate.h>
 #include <mini_console.h>
 #include <inputdata.h>
-#include <spi_regional_division.h>
 
 #include <version.h>
 
 #include <clock.h>
 #include <sar_adc.h>
+#include <board_config.h>
 
 #define SF_UPGRADE_CMD    "ug"
 #define RF_UPGRADE_RES    "ok"
 #define RF_NOUPGRADE_RES    "ng"
 #define CONFIG_UPDATE_KEY	16
 
-#define _ADCKEY_TEST_
+//#define _ADCKEY_TEST_
 
 void jump_0 ( void )
 {
@@ -28,7 +28,7 @@ typedef void ( *main_entry ) ( void );
 int __attribute__ ( ( section ( ".second.boot.entry" ) ) ) second_boot ( int boot_flag )
 {
 	unsigned int check_info = 0;
-	lvds_phy_disable();
+
 	/* copy_data_from_spi_to_sram2(BOOT_DATA_BASE, BOOT_DATA_SIZE>>2); */
 	serial_init ( 0 );
 	serial_init ( 2 );
@@ -37,14 +37,18 @@ int __attribute__ ( ( section ( ".second.boot.entry" ) ) ) second_boot ( int boo
 	printf ( "\nenter the second boot!\nbpflag = 0x%x\n", boot_flag );
 #endif
 	set_boot_stage ( SEC_BOOT_STAGE );
+#if CONFIG_ENABLE_SARADC
 	sar_adc_init();
+#endif
 #ifdef _ADCKEY_TEST_
 	int i, j;
 	INPUTDATA inputdata;
+#if CONFIG_ENABLE_SARADC
 	set_redetect_flag();
-
+#endif
 	if ( boot_flag == REBOOT_FLAG_NORMAL ) {
 		for ( i = 0; i < 3; i++ ) {
+#if  CONFIG_ENABLE_SARADC
 			if ( !detect_adc_key ( 1, &inputdata ) ) {
 				printf ( "data: 0x%x, type: %d\n", inputdata.input_data, inputdata.input_type );
 
@@ -78,7 +82,7 @@ int __attribute__ ( ( section ( ".second.boot.entry" ) ) ) second_boot ( int boo
 					break;
 				}
 			}
-
+#endif
 			for ( j = 100 * 1000; j > 0; j-- )
 				;
 		}
@@ -92,24 +96,30 @@ int __attribute__ ( ( section ( ".second.boot.entry" ) ) ) second_boot ( int boo
 	reset_watchdog();
 
 	if ( REBOOT_FLAG_SUSPEND == boot_flag ) {
-		serial_puts ( "enter suspend!\n" );
-		copy_code_from_spi_to_ICCM ( SUSPEND_CODE_BASE, SUSPEND_CODE_SIZE >> 2 );
-		copy_data_from_spi_to_DCCM ( SUSPEND_DATA_BASE, SUSPEND_DATA_SIZE >> 2 );
-		disable_watchdog();
-		return 0;
+		if (copy_partition_to_ccm(SECTION_0, PARTITION_SUSPEND)) {
+			printf("suspend crc error!\n");
+			reboot(REBOOT_FLAG_FROM_WATCHDOG);
+		}
+		else {
+			serial_puts ( "enter suspend!\n" );
+			disable_watchdog();
+			return 0;
+		}
 	}
 
 	if ( REBOOT_FLAG_UPGRADE1 == boot_flag || REBOOT_FLAG_UPGRADE2 == boot_flag ) {
 		typedef int ( *update ) ();
-		printf ( "upgrade code base: 0x%x, value: 0x%x\n", UPDATE_CODE_BASE, UPDATE_CODE_SIZE );
-		printf ( "upgrade data base: 0x%x, value: 0x%x\n", UPDATE_DATA_BASE, UPDATE_DATA_SIZE );
-		copy_code_from_spi_to_ICCM ( UPDATE_CODE_BASE, UPDATE_CODE_SIZE >> 2 );
-		printf ( "copy upgrade code done!\n" );
-		copy_data_from_spi_to_DCCM ( UPDATE_DATA_BASE, UPDATE_DATA_SIZE >> 2 );
-		printf ( "copy upgrade data done!\n" );
-		disable_watchdog();
-		set_boot_flag ( boot_flag );
-		( ( update ) ICCM_BASE ) ();
+		serial_puts("enter update!\n");
+		if (copy_partition_to_ccm(SECTION_0, PARTITION_UPDATE)) {
+			printf("update crc error!\n");
+			reboot(REBOOT_FLAG_FROM_WATCHDOG);
+		}
+		else {
+			printf ( "copy upgrade data done!\n" );
+			disable_watchdog();
+			set_boot_flag ( boot_flag );
+			( ( update ) ICCM_BASE ) ();
+		}
 	}
 
 	if ( bootdelay > 0 && abortboot ( bootdelay ) ) {
@@ -118,59 +128,20 @@ int __attribute__ ( ( section ( ".second.boot.entry" ) ) ) second_boot ( int boo
 		return 0;
 
 	} else {
-		check_info = check_image_info ( MAIN_H_CHECK_INFO_BASE, MAIN_CHECK_INFO_BASE );
-
-		if ( check_info ) {
+		if (check_image_info(SECTION_0, PARTITION_MAIN)) {
 			printf ( "main img is bad.\n" );
 			reboot ( REBOOT_FLAG_MAIN_ERROR );
 		}
 
-#ifndef HAS_ROM_MAP
-		printf ( "start copy main code, size %d bytes.\n", MAIN_CODE_SIZE );
-		copy_code_from_spi_to_ICCM ( MAIN_CODE_BASE, MAIN_CODE_SIZE >> 2 );
-		printf ( "start copy main data, size %d bytes.\n", ( MAIN_DATA_SIZE ) );
-		copy_data_from_spi_to_DCCM ( MAIN_DATA_BASE, MAIN_DATA_SIZE >> 2 );
-#else
-		unsigned mcode_size = 0;
-		unsigned mdata_size = 0;
-		memcpy ( &mcode_size, ( unsigned char * ) MAIN_CODE_SIZE_INFO_BASE,
-				 sizeof ( mcode_size ) );
-		memcpy ( &mdata_size, ( unsigned char * ) MAIN_DATA_SIZE_INFO_BASE,
-				 sizeof ( mdata_size ) );
-
-		/* backward compatibility and fault tolerance */
-		if ( mcode_size == 0 || mdata_size == 0
-			 || mcode_size > MAIN_CODE_SIZE
-			 || mdata_size > ( MAIN_DATA_SIZE ) ) {
-			mcode_size = MAIN_CODE_SIZE;
-			mdata_size = MAIN_DATA_SIZE;
+		if (copy_partition_to_ccm(SECTION_0, PARTITION_MAIN)) {
+			printf("main crc error!\n");
+			reboot(REBOOT_FLAG_FROM_WATCHDOG);
 		}
-
-		if ( mcode_size % sizeof ( unsigned ) ) {
-			mcode_size +=
-				( sizeof ( unsigned ) - mcode_size % sizeof ( unsigned ) );
+		else {
+			serial_puts("enter main!\n");
+			set_boot_flag ( boot_flag );
+			( ( main_entry ) ICCM_BASE ) ();
+			return 0;
 		}
-
-		if ( mdata_size % sizeof ( unsigned ) ) {
-			mdata_size +=
-				( sizeof ( unsigned ) - mdata_size % sizeof ( unsigned ) );
-		}
-
-#if (BOOT_DEBUG_VERSION == 1)
-		printf ( "start copy main code, size %d.\n", mcode_size );
-#endif
-		copy_code_from_spi_to_ICCM ( MAIN_CODE_BASE, mcode_size >> 2 );
-#if (BOOT_DEBUG_VERSION == 1)
-		printf ( "start copy main data. size %d\n", mdata_size );
-#endif
-		memset ( ( int * ) DCCM_BASE, 0, ( DCCM_SIZE ) );
-		copy_data_from_spi_to_DCCM ( MAIN_DATA_BASE, mdata_size >> 2 );
-#endif
-#if (BOOT_DEBUG_VERSION == 1)
-		printf ( "finish copy main code and run main code.\n" );
-#endif
-		set_boot_flag ( boot_flag );
-		( ( main_entry ) ICCM_BASE ) ();
-		return 0;
 	}
 }

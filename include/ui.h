@@ -67,5 +67,6 @@ extern void hide_menu ( void );
 extern void invalidate ( struct menu_item_t *last, struct menu_item_t *curr );
 extern void invalidateValue ( struct menu_item_t *item, int key );
 extern void invalidateInitValue ( void );
+extern void display_logo(void);
 
 #endif

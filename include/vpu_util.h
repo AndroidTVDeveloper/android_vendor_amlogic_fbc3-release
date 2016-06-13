@@ -2,55 +2,10 @@
 #define _VPU_UTIL_H_
 #include <vpp.h>
 
-//===== sub-unit: PatternGen
-//mode == 10, default value, it's ramp
-//mode == 11, grid9
-//mode == 12, cir15
-//mode == 13, palette
-//mode == 14, triangle
-//mode == 15, colorbar
-//mode == 16, colorbar, LR
-//mode == 17, two color TB
-//mode == 18, two color line by line
-//mode == 19, two color pixel by pixel
-//===new pattern for client==
-//mode == 0, off
-//mode == 1, cir9
-//mode == 2, 100% grey
-//mode == 3, 20% grey
-//mode == 4, black
-//mode == 5, red
-//mode == 6, green
-//mode == 7, blue
-//mode == 8, grey level
-//mode == 9, pallet
-
-typedef enum pattern_mode_e {
-	PATTERN_MODE_OFF = 0,
-	PATTERN_MODE_CIR9,
-	PATTERN_MODE_GREY100,
-	PATTERN_MODE_GREY20,
-	PATTERN_MODE_BLACK,
-	PATTERN_MODE_RED,
-	PATTERN_MODE_GREEN,
-	PATTERN_MODE_BLUE,
-	PATTERN_MODE_GREYLEVEL,
-	PATTERN_MODE_PALLET,
-	PATTERN_MODE_RAMP,
-	PATTERN_MODE_GRID9,
-	PATTERN_MODE_CIR15,
-	PATTERN_MODE_PALETTE,
-	PATTERN_MODE_TRIANGLE,
-	PATTERN_MODE_COLORBAR,
-	PATTERN_MODE_COLORBAR_LR,
-	PATTERN_MODE_COLORBAR_TB,
-	PATTERN_MODE_TWO_COLOR_LINE_BY_LINE,
-	PATTERN_MODE_TWO_COLOR_PIXEL_BY_PIXEL,
-	PATTERN_MODE_AX,
-} pattern_mode_t;
+#define K_SWCLK_IN_VS	0
 
 typedef enum src_mode_e {
-	SRC_MODE_PATTERN = 0,
+	SRC_MODE_OSC = 0,
 	SRC_MODE_HDMI,
 } src_mode_t;
 
@@ -72,7 +27,7 @@ void set_tm_rcvy ( int enable, int hs_width, int vs_width );
 void enable_patgen ( int enable );
 void set_patgen ( pattern_mode_t mode );
 void set_patgen_yuv ( pattern_mode_t mode );
-void enable_csc0_byVs ( int enable );
+//void enable_csc0_byVs ( int enable );
 void enable_csc0 ( int enable );
 void enable_dpln ( int enable );
 void dnlp_config ( int hsize, int vsize, int dnlp_en, int hist_win_en, int luma_hist_spl_en );
@@ -87,6 +42,8 @@ void enable_blend ( int enable );
 void enable_xvycc_lut ( int enable );
 void enable_csc2 ( int enable );
 void vpu_demo_ctrl ( void );
+
+void hdmirx_switch_clocksrc( src_mode_t  Srcmode );
 
 #if 0
 	void enable_sosd ( int enable );

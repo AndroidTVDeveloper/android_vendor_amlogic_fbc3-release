@@ -49,7 +49,7 @@ const cmd_def_t cmd_def[MAX_CMD] = {
 	{ 2, 1, 1, 0, 0, 0 }, /* Index offset 0x9 */
 	{ 2, 1, 1, 0, 0, 0 }, /* Index offset 0xa */
 	{ 2, 1, 1, 0, 0, 0 }, /* Index offset 0xb */
-	{ 0, 0, 0, 0, 0, 0 }, /* Index offset 0xc */
+	{ 4, 3, 0x15, 0, 0, 0 }, /* Index offset 0xc */
 	{ 0, 0, 0, 0, 0, 0 }, /* Index offset 0xd */
 	{ 2, 1, 1, 0, 0, 0 }, /* Index offset 0xe */
 	{ 2, 1, 1, 0, 0, 0 }, /* Index offset 0xf */

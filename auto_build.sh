@@ -1,21 +1,53 @@
 #!/bin/bash
 
-if [ -z $1 ];
-then
-	echo ./setenv.sh 
-	source ./setenv.sh
-else 
-	echo ./$1-setenv.sh
-	source ./$1-setenv.sh
-fi
-
-if [ -z $2 ] || [ "$2" != "PA" ] && [ "$2" != "PB" ];then
-	p_switch="PA"
+if [ -z $1 ];then
+	board="t111"
+	echo $board
+elif [ "$1" = "help" ];then
+	echo "You can build fbc via ./auto_build.sh board_name"
+	echo "board_name:"
+	echo "t111"
+	echo "p350"
+	exit
 else
-	p_switch=$2
+	board="$1"
+	echo $board
 fi
 
-export p_switch
+export board
+
+if [ -z $2 ];then
+	build_op=""
+elif [ "$2" = "clean" ];then
+	build_op="clean"
+elif [ "$2" = "release" ];then
+	build_op="release"
+fi
+
+TEST=`which hcac`
+if [ -z $TEST ]; then
+  TEST=`which arc-elf32-gcc`
+  if [ -z $TEST ]; then
+    CC_DIR=`dirname $TEST`
+    export ARC_COMPILER="GNU"
+    export ARC_TOOLCHAIN_PATH=$CC_DIR
+    echo "Use GNU toolchain for ARC in $ARC_TOOLCHAIN_PATH."
+  else
+    echo "No compiler for ARC find, please install or add PATH of hcac or aec-elf32-gcc."
+  fi
+else
+  CC_DIR=`dirname $TEST`
+  export ARC_COMPILER="METAWARE"
+  export ARC_TOOLCHAIN_PATH=$CC_DIR
+  echo "Use Metaware toolchain for ARC in $ARC_TOOLCHAIN_PATH."
+fi
+
 
 make clean
-make spi 
+if [ -z $build_op ];then
+make spi
+elif [ $build_op = "release" ];then
+make release
+elif [ $build_op = "clean" ];then
+exit
+fi

@@ -15,6 +15,7 @@
 #include <timer.h>
 #include <customer_key_conf.h>
 #include <ui.h>
+#include <board_config.h>
 
 static LIST_HEAD ( osd_input_data_list );
 
@@ -200,7 +201,7 @@ int logo_task_handle ( int task_id, void *param )
 		hide_logo();
 
 	} else {
-		panel_backlight_power ( 1 );
+		backlight_power_ctrl( 1 );
 	}
 
 	return 0;
@@ -215,10 +216,7 @@ int process_menu ( struct menu_item_t *item, int key )
 
 	LOGD ( TAG, "item id is %d, key is %d.\n", item->id, key );
 #define DISABLE_MENU_TOD0
-#ifdef DISABLE_MENU_TOD0
-	return 0;
-#endif
-
+#ifndef DISABLE_MENU_TOD0
 	switch ( key ) {
 		case AMLKEY_MENU:
 			if ( item->id == menu_screen.id ) {
@@ -309,7 +307,7 @@ int process_menu ( struct menu_item_t *item, int key )
 		default:
 			break;
 	}
-
+#endif
 	return 0;
 }
 
@@ -324,7 +322,6 @@ void invalidateInitValue ( void )
 void invalidateValue ( struct menu_item_t *item, int key )
 {
 	char toDisplayvalue[20];
-	int curValue;
 
 	if ( item == NULL ) {
 		return;
@@ -332,6 +329,8 @@ void invalidateValue ( struct menu_item_t *item, int key )
 
 	LOGD ( TAG, "enable osd fresh item value,curr item id is %d\n", item->id );
 	printf ( "enable osd fresh item value,curr item id is %d\n", item->id );
+#ifndef CONFIG_CUSTOMER_PROTOCOL
+	int curValue;
 
 	/* get */
 	if ( item->id == menu_brightness.id ) {
@@ -404,7 +403,7 @@ void invalidateValue ( struct menu_item_t *item, int key )
 	} else {
 		sprintf ( toDisplayvalue, "%d", curValue );
 	}
-
+#endif
 	printf ( "_toDisplayValue: %d\n", toDisplayvalue );
 
 	if ( menu_item_value[item->id].handle > 0 )
@@ -636,6 +635,12 @@ void hide_logo ( void )
 	printf ( "hide_logo.\n" );
 }
 
+void display_logo(void)
+{
+	show_logo ( 12, 705 );
+	OSD_Enable ( 1 );
+}
+
 void init_osd ( void )
 {
 	int i;
@@ -717,8 +722,11 @@ void init_logo_osd ( void )
 	for ( i = 0; i < 16; i++ ) {
 		OSD_SetColor ( i, nRGBA_logo[i][0], nRGBA_logo[i][1], nRGBA_logo[i][2], nRGBA_logo[i][3] );
 	}
-
+#ifndef HAVE_PRO_LOGO
 	OSD_SetBackground ( 1, LOGO_BG_COLOR_INDEX );
+#else
+	OSD_SetBackground ( 1, PRO_LOGO_BG_COLOR_INDEX );
+#endif
 	/* Delay_ms(20); */
 	OSD_CleanScreen ( NULL, 0 );
 	/* Delay_ms(20); */
@@ -765,7 +773,9 @@ void init_ui ( void )
 	if ( UiGetHaveLogoFlag() == 1 ) {
 		init_logo_osd();
 		logo_task_id = RegisterTask ( logo_task_handle, NULL, 0, TASK_PRIORITY_OSD );
+#ifndef HAVE_PRO_LOGO
 		logo_timer_id = request_timer ( logo_task_id, 500 );
+#endif
 
 	} else {
 		logo_task_id = RegisterTask ( logo_task_handle, NULL, 0, TASK_PRIORITY_OSD );

@@ -1,110 +1,73 @@
 #ifndef SPI_REGIONAL_DIVISION_H
 #define SPI_REGIONAL_DIVISION_H
 
-#define MAX_NAME_LEN					0x10
-#define CHECK_INFO_SIZE				0x30
 
-#define COMPLETE_SPI_MAGIC			0x12345678
-#define BOOT_SPI_MAGIC					0x11111111
-#define MAIN_CODE_SPI_MAGIC			0x22222222
-#define MAIN_DATA_SPI_MAGIC			0x33333333
-#define MAIN_RODATA_SPI_MAGIC			0x44444444
-#define MAIN_PARAM_SPI_MAGIC			0x55555555
+#define SPI_BASE 0x41000000
+#define CHECK_INFO_SIZE 0x30
 
-#define ICCM_BASE						0x00000000
-#define ICCM_SIZE						0x20000
-#define DCCM_BASE						0xffff0000
-#define DCCM_SIZE						0x10000
-#define SRAM1_BASE						0x70020000
-#define SRAM2_BASE						0x80020000
-#define SRAM_SIZE						0x10000
+#define RSA_KEY_OFFSET 0
+#define RSA_KEY_SIZE 0x1000
 
-typedef struct _tag_spi_blocks_info_t {
-	char name[MAX_NAME_LEN];
-	unsigned int size;
-	unsigned int addr;
-} spi_blocks_t;
+#define HDCP_KEY_OFFSET 0x1000
+#define HDCP_KEY_SIZE 0x40000
 
+#define PARTITION_INFO_SIZE 0x200
+#define FIRST_BOOT_INFO_OFFSET 0x41000 //for rom-boot
+#define FIRST_BOOT_INFO_SIZE 0x1000
+
+#define SECTION_INFO_SIZE 0x1000
+#define SECTION_0_INFO_OFFSET 0x42000
+#define SECTION_1_INFO_OFFSET 0x43000
+
+#define FIRST_BOOT_OFFSET 0x44000
+#define FIRST_BOOT_SIZE 0x5000
+
+#define SECTION_SIZE 0xAD000 //692K
+#define SECTION_0_OFFSET 0x49000
+#define SECTION_1_OFFSET 0xF6000
+
+
+//section
+enum {
+	SECTION_0,
+	SECTION_1,
+};
+
+//partition
+enum {
+	PARTITION_FIRST_BOOT = 0,
+	PARTITION_SECOND_BOOT,
+	PARTITION_SUSPEND,
+	PARTITION_UPDATE,
+	PARTITION_MAIN,
+	PARTITION_PQ,
+	PARTITION_USER,
+	PARTITION_FACTORY,
+	PARTITION_NUM,
+};
+
+
+#define SIGNATURE_SIZE 256
 typedef struct {
-	char name[MAX_NAME_LEN];
-	unsigned int magic;
-	unsigned int crc;
-	unsigned int size;
-} check_info_t;
-
-int check_image ( unsigned s_offs, int size );
-
-#define SPI_BASE								(0x41000000)
-
-#define PARTITION_INFO_OFFSET   				(0x41000)
-#define PARTITION_INFO_SIZE					(0x1000)
-
-#define SPI_BLOCKS_OFFSET						(PARTITION_INFO_OFFSET + PARTITION_INFO_SIZE)//0x42000
-#define SPI_BLOCKS_SIZE						(0x1000)
-
-#define FIRST_BOOT_CODE_SIZE					(0x4000)
-#define FIRST_BOOT_DATA_SIZE					(0x1000)
-
-#define BOOT_CODE_SIZE							(0x9800 - CHECK_INFO_SIZE)
-#define BOOT_DATA_SIZE							(0x1800)
-
-#define SUSPEND_CODE_SIZE						(0x5000)
-#define SUSPEND_DATA_SIZE						(0x1000)
-
-#define UPDATE_CODE_SIZE						(0x18000)
-#define UPDATE_DATA_SIZE						(0x6000)
-
-#define FIRST_BOOT_CODE_BASE					(SPI_BASE + SPI_BLOCKS_OFFSET + SPI_BLOCKS_SIZE)//0x43000
-#define FIRST_BOOT_DATA_BASE					(FIRST_BOOT_CODE_BASE + FIRST_BOOT_CODE_SIZE)//0x47000
-
-#define SECOND_BOOT_BASE						(FIRST_BOOT_DATA_BASE + FIRST_BOOT_DATA_SIZE)//0x48000
-#define BOOT_CODE_BASE							(SECOND_BOOT_BASE + CHECK_INFO_SIZE)//0x48030
-#define BOOT_DATA_BASE							(BOOT_CODE_BASE + BOOT_CODE_SIZE)//0x51800
-
-#define SUSPEND_CODE_BASE						(BOOT_DATA_BASE + BOOT_DATA_SIZE)//0x53000
-#define SUSPEND_DATA_BASE						(SUSPEND_CODE_BASE + SUSPEND_CODE_SIZE)//0x58000
-
-#define UPDATE_CODE_BASE						(SUSPEND_DATA_BASE + SUSPEND_DATA_SIZE)//0x59000
-#define UPDATE_DATA_BASE						(UPDATE_CODE_BASE + UPDATE_CODE_SIZE)//0x71000
-
-#define MAIN_CODE_BASE							(UPDATE_DATA_BASE + UPDATE_DATA_SIZE)//0x77000
-#define MAIN_CODE_SIZE							(0x20000)
-
-#define MAIN_DATA_BASE							(MAIN_CODE_BASE + MAIN_CODE_SIZE)//0x97000
-#define MAIN_DATA_SIZE							(0xe000)
-
-#define MAIN_SPI_CODE_BASE					(MAIN_DATA_BASE + MAIN_DATA_SIZE)//0xA5000
-#define MAIN_SPI_CODE_SIZE					(0x10000)
-
-#define MAIN_RODATA_BASE						(MAIN_SPI_CODE_BASE + MAIN_SPI_CODE_SIZE)//0xB5000
-#define MAIN_RODATA_SIZE						(0x2D000)
-
-#define FBC_MAIN_BASE_OFFSET					(MAIN_CODE_BASE - SPI_BASE)
-
-#define AUDIO_PARAM_AREA_SIZE					(0x2000)
-#define PQ_PARAM_AREA_SIZE					(0xB000)
-#define RESERVED_PARAM_AREA_SIZE				(0x6000)
-
-#define PARAM_AREA_BASE						(MAIN_RODATA_BASE + MAIN_RODATA_SIZE)
-#define PARAM_AREA_BASE_OFFSET				(MAIN_RODATA_BASE + MAIN_RODATA_SIZE - SPI_BASE)
-#define AUDIO_PARAM_AREA_BASE_OFFSET			(PARAM_AREA_BASE_OFFSET)//0xE2000
-#define PQ_PARAM_AREA_BASE_OFFSET			(AUDIO_PARAM_AREA_BASE_OFFSET + AUDIO_PARAM_AREA_SIZE)//0xE4000
-#define SYSTEM_PARAM_AREA_BASE_OFFSET		(PQ_PARAM_AREA_BASE_OFFSET + PQ_PARAM_AREA_SIZE)//0xEF000
-#define SPI_MAIN_END							(SYSTEM_PARAM_AREA_BASE_OFFSET + RESERVED_PARAM_AREA_SIZE)//0xF5000
-
-#define BOOT_SIZE								(0x34000)//FIRST_BOOT_CODE_SIZE + FIRST_BOOT_DATA_SIZE + BOOT_CODE_SIZE + BOOT_DATA_SIZE + SUSPEND_CODE_SIZE + SUSPEND_DATA_SIZE+UPDATE_CODE_SIZE+UPDATE_DATA_SIZE
-#define MAIN_SIZE								(0x7E000)//MAIN_CODE_SIZE+MAIN_DATA_SIZE+MAIN_SPI_CODE_SIZE+MAIN_RODATA_SIZE+AUDIO_PARAM_AREA_SIZE+PQ_PARAM_AREA_SIZE+RESERVED_PARAM_AREA_SIZE
-
-#define BACKUP_BOOT_BASE						(MAIN_CODE_BASE + MAIN_SIZE)
-#define BACKUP_MAIN_BASE						(BACKUP_BOOT_BASE + BOOT_SIZE)
-
-#define BOOT_H_CHECK_INFO_BASE				(BOOT_CODE_BASE - CHECK_INFO_SIZE)
-#define BOOT_CHECK_INFO_BASE					(MAIN_CODE_BASE - CHECK_INFO_SIZE)
-
-#define MAIN_CHECK_INFO_BASE					(MAIN_CODE_BASE + MAIN_SIZE - CHECK_INFO_SIZE)
-#define MAIN_H_CHECK_INFO_BASE				(MAIN_CODE_BASE + 0x100)
-
-#define MAIN_CODE_SIZE_INFO_BASE				(MAIN_CHECK_INFO_BASE + CHECK_INFO_SIZE - 2*sizeof(unsigned))
-#define MAIN_DATA_SIZE_INFO_BASE				(MAIN_CHECK_INFO_BASE + CHECK_INFO_SIZE - 1*sizeof(unsigned))
+	unsigned code_offset;
+	unsigned code_size;
+	unsigned data_offset;
+	unsigned data_size;
+	unsigned bss_offset;
+	unsigned bss_size;
+	unsigned readonly_offset;
+	unsigned readonly_size;
+	unsigned char signature[SIGNATURE_SIZE];
+	unsigned spi_code_offset;
+	unsigned spi_code_size;
+	unsigned audio_param_offset;
+	unsigned audio_param_size;
+	unsigned pq_param_offset;
+	unsigned pq_param_size;
+	unsigned reserve_param_offset;
+	unsigned reserve_param_size;
+	unsigned crc;
+	unsigned char sha[32];
+} partition_info_t;
 
 #endif

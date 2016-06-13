@@ -36,9 +36,21 @@ _start:
 	mov r27, 0x00000000
 	mov r28, 0x00000000
 
+/*clean BSS*/
+	mov r0, 0
+	mov r1, _fbss
+	cmp r1, _ebss
+	beq end_loop
+clear_loop:
+	st r0, [r1]
+	add r1, r1, 4
+	cmp r1, _ebss
+	bne clear_loop
+
+end_loop:
 ; --- Initialize stack pointer registers
 
-	mov  sp, 0xfffff000  ; Put sp in DCCM
+	mov  sp, 0xfffffff0  ; Put sp in DCCM
 	bl	main
 	nop
 	nop

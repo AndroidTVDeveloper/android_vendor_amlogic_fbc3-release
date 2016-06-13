@@ -17,96 +17,16 @@
 
 #include <vpp.h>
 #include <common.h>
+#include <board_config.h>
+#include <relocate.h>
+#ifdef CONFIG_CUSTOMER_PROTOCOL
+#include <handle_cmd.h>
+#endif
 
-#define HDCP_KEY_PARA 0x5A
 
-#define CC_FACTORY_SN_SIZE     (20)
+struct systems cur_system;
 
-#define CC_CRI_REVERSED_LEN    (112)
-#define CC_CRI_DEVICE_ID_LEN   (124)
-#define CC_CRI_FAC_SN_LEN      (128)
 
-struct system_setting {
-
-	unsigned char sleep_time;
-	/* 0 direct suspend, 1 direct power on */
-	unsigned char power_on_mode;
-	unsigned char watch_dog;
-
-};
-
-struct vpp_switch {
-
-	/*VPU_MODULE_VPU,       //vpu uint
-	 VPU_MODULE_TIMGEN,
-	 VPU_MODULE_PATGEN,
-	 VPU_MODULE_GAMMA,
-	 VPU_MODULE_WB,      //WhiteBalance
-	 VPU_MODULE_BC,      //Brightness&Contrast
-	 VPU_MODULE_BCRGB,   //RGB Brightness&Contrast
-	 VPU_MODULE_CM2,
-	 VPU_MODULE_CSC1,
-	 VPU_MODULE_DNLP,
-	 VPU_MODULE_CSC0,
-	 VPU_MODULE_OSD,
-	 VPU_MODULE_BLEND,
-	 VPU_MODULE_DEMURE,  //15
-	 VPU_MODULE_OUTPUT,  //LVDS/VX1 output
-	 VPU_MODULE_OSDDEC,  //OSD decoder */
-	/* unsigned char vpu_enable; */
-	/* unsigned char timgen_enable; */
-	/* unsigned char patgen_enable; */
-	unsigned char gamma_enable;
-
-	unsigned char wb_enable;
-
-	/* unsigned char bc_enable; */
-	/* unsigned char bcrgb_enable; */
-	unsigned char cm2_enable;
-
-	/* unsigned char csc1_enable; */
-	unsigned char dnlp_enable;
-
-	unsigned char nature_light_enable;
-
-	/* unsigned char csc0_enable; */
-	/* unsigned char osd_enable; */
-	/* unsigned char blend_enable; */
-	/* unsigned char demura_enable; */
-	/* unsigned char output_enable; */
-	/* unsigned char osddec_enable; */
-};
-
-struct systems {
-
-	unsigned project_id; /* must be 1st member */
-	unsigned version;
-
-	unsigned v2;
-
-	char device_id[CC_CRI_DEVICE_ID_LEN];
-
-	char factory_sn[CC_FACTORY_SN_SIZE];
-
-	struct system_setting system;
-
-	struct vpp_switch vpp;
-
-};
-
-static struct systems cur_system;
-
-struct user_setting {
-
-	unsigned char change_flag;
-
-	struct systems *system;
-
-	struct audio_control *audio;
-
-	vpu_fac_pq_t *pq;
-
-};
 
 struct user_setting_save {
 
@@ -244,7 +164,7 @@ static const vpu_picmod_table_t pic_table_def[PICMOD_MAX] = { { PICMOD_STD, 128,
 
 static struct wb_setting g_wb_setting = { 0 };
 
-static struct user_setting g_user_setting = { 0 };
+struct user_setting g_user_setting = { 0 };
 
 static struct user_setting_save g_user_setting_save = { 0 };
 
@@ -254,8 +174,9 @@ int setting_task_id = -1;
 	int save_task_id = -1;
 
 #endif
-static LIST_HEAD ( setting_list );
+LIST_HEAD ( setting_list );
 
+#ifndef CONFIG_CUSTOMER_PROTOCOL
 unsigned int write_user_setting ( unsigned char *s )
 {
 	switch ( CmdID ( s ) ) {
@@ -384,6 +305,7 @@ unsigned char read_user_setting ( unsigned char *s, int *returns )
 	free ( params );
 	return 0;
 }
+#endif//CONFIG_CUSTOMER_PROTOCOL
 
 int isPorjectIDValid ( unsigned int id )
 {
@@ -940,10 +862,167 @@ void pq_load_spi_data ( void )
 {
 	/* LOGI(TAG_VPP, "load pq data from spi!\n"); */
 	unsigned char *des = ( unsigned char * ) &vpu_config_table;
-	spi_flash_read ( get_spi_flash_device ( 0 ), PQ_PARAM_AREA_BASE_OFFSET, sizeof ( vpu_config_t ), des );
+	partition_info_t* info = get_partition_info(SECTION_0, PARTITION_MAIN);
+	spi_flash_read(get_spi_flash_device(0), PQ_BINARY_START, sizeof(vpu_config_t), des);
 	/* LOGI(TAG_VPP, "load pq data from spi over!\n"); */
 }
 
+
+#ifdef CONFIG_CUSTOMER_PROTOCOL
+static unsigned int temp_mode;
+void req_vpu_colortemp_adj ( vpu_colortemp_t val_ui )
+{
+	if ( val_ui >= COLOR_TEMP_MAX ) {
+		printf("val_ui = %d\n",val_ui);
+		printf("req_vpu_colortemp_adj dead....\n");
+		return;
+	}
+	temp_mode = val_ui;
+	printf("vpu_colorte start....\n");
+	vpu_wb_gain_adj ( colortemp_table[val_ui].wb_param.gain_r, WBSEL_R );
+	vpu_wb_gain_adj ( colortemp_table[val_ui].wb_param.gain_g, WBSEL_G );
+	vpu_wb_gain_adj ( colortemp_table[val_ui].wb_param.gain_b, WBSEL_B );
+	vpu_wb_offset_adj ( colortemp_table[val_ui].wb_param.pre_offset_r,
+						WBSEL_R, WBOFFSET_PRE );
+	vpu_wb_offset_adj ( colortemp_table[val_ui].wb_param.pre_offset_g,
+						WBSEL_G, WBOFFSET_PRE );
+	vpu_wb_offset_adj ( colortemp_table[val_ui].wb_param.pre_offset_b,
+						WBSEL_B, WBOFFSET_PRE );
+	vpu_wb_offset_adj ( colortemp_table[val_ui].wb_param.post_offset_r,
+						WBSEL_R, WBOFFSET_POST );
+	vpu_wb_offset_adj ( colortemp_table[val_ui].wb_param.post_offset_g,
+						WBSEL_G, WBOFFSET_POST );
+	vpu_wb_offset_adj ( colortemp_table[val_ui].wb_param.post_offset_b,
+						WBSEL_B, WBOFFSET_POST );
+}
+
+int req_colortemp_getting ( vpu_colortemp_t mode)
+{
+	unsigned int ret;
+
+	if ( mode >= COLOR_TEMP_MAX ) {
+		printf("req_colortemp_getting dead....\n");
+		ret = mode_not_support;
+	} else {
+		mode = temp_mode;
+		printf("req_colortemp_getting-->> mode =%d\n",mode);
+	}
+	return mode;
+
+}
+
+int req_wb_data_setting ( vpu_colortemp_t mode, unsigned short gain_r,
+			unsigned short gain_g,unsigned short gain_b,
+			unsigned short pre_offset_r,unsigned short pre_offset_g,
+			unsigned short pre_offset_b) {
+	g_wb_setting.adjusted = 1;
+	white_balance_setting_ext_t *val;
+
+	printf ("req_wb_data_setting--->mode = %d\n",mode);
+
+	switch ( mode ) {
+		case COLOR_TEMP_COLD:
+			g_wb_setting.cold.color_temp = COLOR_TEMP_COLD;
+			g_wb_setting.cold.wb_param.gain_r = val->r_gain;
+			g_wb_setting.cold.wb_param.gain_g = val->g_gain;
+			g_wb_setting.cold.wb_param.gain_b = val->b_gain;
+			g_wb_setting.cold.wb_param.pre_offset_r = val->r_offset;
+			g_wb_setting.cold.wb_param.pre_offset_g = val->g_offset;
+			g_wb_setting.cold.wb_param.pre_offset_b = val->b_offset;
+			break;
+		case COLOR_TEMP_WARM:
+			g_wb_setting.warm.color_temp = COLOR_TEMP_WARM;
+			g_wb_setting.warm.wb_param.gain_r = val->r_gain;
+			g_wb_setting.warm.wb_param.gain_g = val->g_gain;
+			g_wb_setting.warm.wb_param.gain_b = val->b_gain;
+			g_wb_setting.warm.wb_param.pre_offset_r = val->r_offset;
+			g_wb_setting.warm.wb_param.pre_offset_g = val->g_offset;
+			g_wb_setting.warm.wb_param.pre_offset_b = val->b_offset;
+			break;
+		case COLOR_TEMP_STD:
+			g_wb_setting.standard.color_temp = COLOR_TEMP_STD;
+			g_wb_setting.standard.wb_param.gain_r = val->r_gain;
+			g_wb_setting.standard.wb_param.gain_g = val->g_gain;
+			g_wb_setting.standard.wb_param.gain_b = val->b_gain;
+			g_wb_setting.standard.wb_param.pre_offset_r = val->r_offset;
+			g_wb_setting.standard.wb_param.pre_offset_g = val->g_offset;
+			g_wb_setting.standard.wb_param.pre_offset_b = val->b_offset;
+			break;
+		case COLOR_TEMP_USER:
+			g_wb_setting.user.color_temp = COLOR_TEMP_USER;
+			g_wb_setting.user.wb_param.gain_r = val->r_gain;
+			g_wb_setting.user.wb_param.gain_g = val->g_gain;
+			g_wb_setting.user.wb_param.gain_b = val->b_gain;
+			g_wb_setting.user.wb_param.pre_offset_r = val->r_offset;
+			g_wb_setting.user.wb_param.pre_offset_g = val->g_offset;
+			g_wb_setting.user.wb_param.pre_offset_b = val->b_offset;
+			break;
+
+		default:
+			break;
+	}
+
+	load_user_wb_setting();
+	req_vpu_colortemp_adj( mode );
+	return write_wb_setting_flash();
+}
+
+white_balance_setting_ext_t *req_wb_data_getting ( vpu_colortemp_t mode) {
+	white_balance_setting_ext_t *val = ( white_balance_setting_ext_t * ) malloc ( sizeof ( white_balance_setting_ext_t ) );
+
+	 if ( mode == 0 ) {
+			val->r_gain = g_wb_setting.cold.wb_param.gain_r;
+			val->g_gain = g_wb_setting.cold.wb_param.gain_g;
+			val->b_gain = g_wb_setting.cold.wb_param.gain_b;
+			val->r_offset = g_wb_setting.cold.wb_param.pre_offset_r;
+			val->g_offset = g_wb_setting.cold.wb_param.pre_offset_g;
+			val->b_offset = g_wb_setting.cold.wb_param.pre_offset_b;
+	} else if ( mode == 1 ) {
+			val->r_gain = g_wb_setting.warm.wb_param.gain_r;
+			val->g_gain = g_wb_setting.warm.wb_param.gain_g;
+			val->b_gain = g_wb_setting.warm.wb_param.gain_b;
+			val->r_offset = g_wb_setting.warm.wb_param.pre_offset_r;
+			val->g_offset = g_wb_setting.warm.wb_param.pre_offset_g;
+			val->b_offset = g_wb_setting.warm.wb_param.pre_offset_b;
+	} else if ( mode == 2 ) {
+			val->r_gain = g_wb_setting.standard.wb_param.gain_r;
+			val->g_gain = g_wb_setting.standard.wb_param.gain_g;
+			val->b_gain = g_wb_setting.standard.wb_param.gain_b;
+			val->r_offset = g_wb_setting.standard.wb_param.pre_offset_r;
+			val->g_offset = g_wb_setting.standard.wb_param.pre_offset_g;
+			val->b_offset = g_wb_setting.standard.wb_param.pre_offset_b;
+		} else if ( mode == 3 ) {
+			val->r_gain = g_wb_setting.user.wb_param.gain_r;
+			val->g_gain = g_wb_setting.user.wb_param.gain_g;
+			val->b_gain = g_wb_setting.user.wb_param.gain_b;
+			val->r_offset = g_wb_setting.user.wb_param.pre_offset_r;
+			val->g_offset = g_wb_setting.user.wb_param.pre_offset_g;
+			val->b_offset = g_wb_setting.user.wb_param.pre_offset_b;
+	}
+	else {
+			free ( val );
+			val = NULL;
+	}
+
+	return val;
+}
+
+void req_set_patgen (  unsigned int r_val, unsigned int g_val, unsigned int b_val ){
+	enable_patgen ( 1 );
+	vpu_testpat_def(); /* reset patgen */
+	vpu_patgen_bar_set ( r_val, g_val, b_val );
+	vpu_color_bar_mode();
+}
+
+void enable_eye_protection ( vpu_wbsel_t rgb_sel ){
+	vpu_colortemp_t val_ui;
+	vpu_wb_gain_adj ( colortemp_table[val_ui].wb_param.gain_b, WBSEL_B );
+}
+#endif //CONFIG_CUSTOMER_PROTOCOL
+
+
+
+#ifndef CONFIG_CUSTOMER_PROTOCOL
 static int check_cmd_is_supported ( int cmd )
 {
 	switch ( cmd ) {
@@ -961,7 +1040,7 @@ static int check_cmd_is_supported ( int cmd )
 static int set_lvds_ssg ( int level )
 {
 	/* printf("set_lvds_ssg level:%d\n",level); */
-	Spread_spectrum ( level );
+	set_lcd_clk_ss ( level );
 	return 0;
 }
 
@@ -1052,6 +1131,7 @@ static int setting_task_handle ( int task_id, void *param )
 
 	return 0;
 }
+#endif //CONFIG_CUSTOMER_PROTOCOL
 
 void read_pq_by_id ( unsigned int id, unsigned char *buf )
 {
@@ -1095,8 +1175,15 @@ int load_pq_by_id ( unsigned int id )
 				return -1;
 			}
 
-			spi_flash_erase ( get_spi_flash_device ( 0 ), PQ_PARAM_AREA_BASE_OFFSET, PQ_PARAM_AREA_SIZE );
-			spi_flash_write ( get_spi_flash_device ( 0 ), PQ_PARAM_AREA_BASE_OFFSET, PQ_BINARY_UNIT_SIZE, buf );
+			partition_info_t* info = get_partition_info(SECTION_0, PARTITION_MAIN);
+			spi_flash_erase(get_spi_flash_device(0),
+					info->pq_param_offset,
+					info->pq_param_size);
+
+			spi_flash_write(get_spi_flash_device(0),
+					info->pq_param_offset,
+					PQ_BINARY_UNIT_SIZE, buf);
+
 			free ( buf );
 			buf = NULL;
 			printf ( "id(%d) load pq done!\n", id );
@@ -1116,7 +1203,12 @@ int check_pq_by_id ( unsigned int id )
 	if ( buf != NULL ) {
 		if ( isPorjectIDValid ( id ) == 0 ) {
 			memset ( buf, 0, PQ_BINARY_UNIT_SIZE );
-			spi_flash_read ( get_spi_flash_device ( 0 ), PQ_PARAM_AREA_BASE_OFFSET, PQ_BINARY_UNIT_SIZE, buf );
+
+			partition_info_t* info = get_partition_info(SECTION_0, PARTITION_MAIN);
+			spi_flash_read(get_spi_flash_device(0),
+				       info->pq_param_offset,
+				       PQ_BINARY_UNIT_SIZE, buf);
+
 			def_pq_crc = crc32 ( 0, buf, PQ_BINARY_UNIT_SIZE - 4 );
 			memset ( buf, 0, PQ_BINARY_UNIT_SIZE );
 			read_pq_by_id ( id, buf );

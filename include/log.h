@@ -65,6 +65,8 @@ int log_print_to_buffer ( int level, int flag, const char *tag, const char *__fm
 #define LOGE_NO_WAKEUP(TAG, ...)	log_print_to_buffer(LOG_LEVEL_E, 0, TAG, __VA_ARGS__)
 #define LOGV_NO_WAKEUP(TAG, ...)	log_print_to_buffer(LOG_LEVEL_V, 0, TAG, __VA_ARGS__)
 
+extern int init_log ( void );
+
 #else
 
 #define LOGI(TAG, ...)	((void)0)
@@ -80,8 +82,6 @@ int log_print_to_buffer ( int level, int flag, const char *tag, const char *__fm
 #define LOGV_NO_WAKEUP(TAG, ...)	((void)0)
 
 //#define printf(...) ((void)0)
-
-extern int init_log ( void );
 
 #endif IN_FBC_MAIN_CONFIG
 #endif __LOG__

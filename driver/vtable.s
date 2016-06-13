@@ -139,8 +139,16 @@ _start:
 	FLAG	0x6 				; enable level 1 and level 2 interrupts
 	NOP
 
+	mov r0, 0
+	mov r1, _fbss
+clear_loop:
+	st r0, [r1]
+	add r1, r1, 4
+	cmp r1, _ebss
+	bne clear_loop
+
 ; --- Initialize stack pointer registers
-	mov  sp, 0xfffff000  ; Put sp in DCCM
+	mov  sp, 0xfffffff0  ; Put sp in DCCM
 	bl	main
 	nop
 

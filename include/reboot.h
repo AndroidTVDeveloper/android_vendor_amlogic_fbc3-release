@@ -40,7 +40,5 @@ unsigned get_watchdog_threshold();
 unsigned get_watchdog_current_count();
 typedef unsigned int ( * reboot_timming ) ();
 void registerRebootTimming ( reboot_timming func );
-extern void lvds_phy_disable();
-extern void set_vx1_signal_off ( void );
 
 #endif	//__FBC_REBOOT_H__

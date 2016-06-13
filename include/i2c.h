@@ -25,6 +25,8 @@
 
 #define AT24C64_I2C_ADDR	0xA0
 
+#define TAS5766_I2C_ADDR	0x98
+
 #define I2C_SUSPEND_SPEED    6                  // speed = 8KHz / I2C_SUSPEND_SPEED
 
 #define I2C_CTRL_CLK_DELAY_MASK			0x3ff
