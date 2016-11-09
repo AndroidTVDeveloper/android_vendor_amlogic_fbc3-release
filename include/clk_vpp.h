@@ -1,6 +1,21 @@
 #ifndef CLK_VPP_H
 #define CLK_VPP_H
 
+#define K_CLOCK_MODE_ENCL_MODE1			0
+#define K_CLOCK_MODE_ENCL_MODE2			1
+#define K_CLOCK_MODE_ENCL_HDMI			2
+
+
+#define K_USE_CLOCK_MODE				K_CLOCK_MODE_ENCL_MODE2
+
+#define K_CLK_MEASURE_SRC_SYS_OSC				0
+#define K_CLK_MEASURE_SRC_HDMI_CABLECLK			29
+#define K_CLK_MEASURE_SRC_VID_PLLCLK			30
+#define K_CLK_MEASURE_SRC_VPU_CTSCLK			31
+#define K_CLK_MEASURE_SRC_LVDS_FIFOCLK			32
+#define K_CLK_MEASURE_SRC_HDMI_TMDSCLK			41
+#define K_CLK_MEASURE_SRC_II2OUT_MCLK			62
+
 
 typedef enum {
 	TV_ENC_LCD480x234 = 0,
@@ -48,19 +63,22 @@ typedef enum {
 #define CLK_UTIL_VID_PLL_DIV_14     12
 #define CLK_UTIL_VID_PLL_DIV_15     13
 
-extern void lcd_phy_ctrl(int flag);
-extern void lcd_phy_adjust(unsigned int vswing, unsigned int preem);
+#define K_MSR_TIME			64
+
 void clocks_set_vid_clk_div ( int div_sel );
 void vclk_set_encl_lvds ( int vformat, int lvds_ports );
 void vclk_set_encl_vx1 ( int vfromat, int lane_num, int byte_num );
+void vclk_set_encl_vx1_mode2 ( int vfromat, int lane_num, int byte_num );
 int set_vx1_lvds_dpll ( int freq, int od1 );
 void set_crt_video_enc ( int inSel, int DivN );
 //void enable_crt_vpu_clki (int enable, int inSel);
 //void enable_crt_vpu_clko (int enable, int inSel);
-unsigned long clk_util_clk_msr (   unsigned long   clk_mux, unsigned long   uS_gate_time );
+unsigned int clk_util_clk_msr(unsigned int clk_mux, unsigned int uS_gate_time ,unsigned int* realcnt);
+unsigned int clk_util_clk_msr2 ( unsigned int clk_mux, unsigned int uS_gate_time,unsigned int* realcnt);
 void clock_set_srcif_ref_clk();
 void vclk_set_lvds_hdmi ( int tmds_bits, int tmds_repeat, int lvds_ports );
 void vclk_set_vx1_hdmi ( int tmds_bits, int tmds_repeat, int lane_num, int byte_num );
 void set_crt_hdmi_div ( int inSel, int DivN );
+extern void vclk_monitor_debug(void);
 
 #endif

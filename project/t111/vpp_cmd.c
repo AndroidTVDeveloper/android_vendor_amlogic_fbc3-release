@@ -17,12 +17,17 @@
 #include <hdmirx.h>
 #include <hdmirx_parameter.h>
 #include <board_config.h>
-
+#include <panel.h>
+#include <vpp_pq.h>
 
 /* ----------------------------------------------- */
 /* Global variables */
 /* ----------------------------------------------- */
 unsigned int ( *save ) ( unsigned char *s );
+
+//extern int setting_task_id;
+
+
 /* static read_parameter vpp_read_param = NULL; */
 /* void register_vpp_save(save_parameter save_func, read_parameter read_func) */
 void register_vpp_save ( save_parameter save_func )
@@ -75,8 +80,8 @@ void vpp_module_enable_bypass ( vpu_modules_t module, int enable )
 			break;
 
 		case VPU_MODULE_DNLP:
-			dnlp_en_flag = enable;
-			/* enable_dnlp(enable); */
+			//dnlp_en_flag = enable;
+			enable_dnlp(enable);
 			break;
 
 		case VPU_MODULE_CSC0:
@@ -115,41 +120,55 @@ void vpp_module_enable_bypass ( vpu_modules_t module, int enable )
 
 void vpp_process_wb_getting ( vpu_message_t message, int *rets )
 {
+	//vpu_fac_pq_t* pvpu_fac_pq = &vpu_fac_pq_setting;
+	vpu_wb_t tabWb;
+
+	nvm_read_wb_param(nvm_read_wb_mode(),&tabWb);
+
 	switch ( message.cmd_id & 0x7f ) {
 		case VPU_CMD_RED_GAIN_DEF:
-			rets[0] = vpu_fac_pq_setting.colortemp_user.gain_r;
+			//rets[0] = pvpu_fac_pq->colortemp_user.gain_r;
+			rets[0] = tabWb.gain_r;
 			break;
 
 		case VPU_CMD_GREEN_GAIN_DEF:
-			rets[0] = vpu_fac_pq_setting.colortemp_user.gain_g;
+			//rets[0] = pvpu_fac_pq->colortemp_user.gain_g;
+			rets[0] = tabWb.gain_g;
 			break;
 
 		case VPU_CMD_BLUE_GAIN_DEF:
-			rets[0] = vpu_fac_pq_setting.colortemp_user.gain_b;
+			//rets[0] = pvpu_fac_pq->colortemp_user.gain_b;
+			rets[0] = tabWb.gain_b;
 			break;
 
 		case VPU_CMD_PRE_RED_OFFSET_DEF:
-			rets[0] = vpu_fac_pq_setting.colortemp_user.pre_offset_r;
+			//rets[0] = pvpu_fac_pq->colortemp_user.pre_offset_r;
+			rets[0] = tabWb.pre_offset_r;
 			break;
 
 		case VPU_CMD_PRE_GREEN_OFFSET_DEF:
-			rets[0] = vpu_fac_pq_setting.colortemp_user.pre_offset_g;
+			//rets[0] = pvpu_fac_pq->colortemp_user.pre_offset_g;
+			rets[0] = tabWb.pre_offset_g;
 			break;
 
 		case VPU_CMD_PRE_BLUE_OFFSET_DEF:
-			rets[0] = vpu_fac_pq_setting.colortemp_user.pre_offset_b;
+			//rets[0] = pvpu_fac_pq->colortemp_user.pre_offset_b;
+			rets[0] = tabWb.pre_offset_b;
 			break;
 
 		case VPU_CMD_POST_RED_OFFSET_DEF:
-			rets[0] = vpu_fac_pq_setting.colortemp_user.post_offset_r;
+			//rets[0] = pvpu_fac_pq->colortemp_user.post_offset_r;
+			rets[0] = tabWb.post_offset_r;
 			break;
 
 		case VPU_CMD_POST_GREEN_OFFSET_DEF:
-			rets[0] = vpu_fac_pq_setting.colortemp_user.post_offset_g;
+			//rets[0] = pvpu_fac_pq->colortemp_user.post_offset_g;
+			rets[0] = tabWb.post_offset_g;
 			break;
 
 		case VPU_CMD_POST_BLUE_OFFSET_DEF:
-			rets[0] = vpu_fac_pq_setting.colortemp_user.post_offset_b;
+			//rets[0] = pvpu_fac_pq->colortemp_user.post_offset_b;
+			rets[0] = tabWb.post_offset_b;
 			break;
 
 		case VPU_CMD_WB:
@@ -164,49 +183,72 @@ void vpp_process_wb_getting ( vpu_message_t message, int *rets )
 
 void vpp_process_wb_setting ( vpu_message_t message )
 {
+	//vpu_fac_pq_t* pvpu_fac_pq = &vpu_fac_pq_setting;
+	vpu_wb_t tabWb;
+
+	nvm_read_wb_param(nvm_read_wb_mode(),&tabWb);
+
 	switch ( message.cmd_id ) {
 		case VPU_CMD_RED_GAIN_DEF:
-			vpu_fac_pq_setting.colortemp_user.gain_r = message.parameter1;
+			//pvpu_fac_pq->colortemp_user.gain_r = message.parameter1;
+			tabWb.gain_r = message.parameter1;
+			nvm_write_wb_param(nvm_read_wb_mode(),&tabWb,0);
 			vpu_wb_gain_adj ( message.parameter1, WBSEL_R );
 			break;
 
 		case VPU_CMD_GREEN_GAIN_DEF:
-			vpu_fac_pq_setting.colortemp_user.gain_g = message.parameter1;
+			//pvpu_fac_pq->colortemp_user.gain_g = message.parameter1;
+			tabWb.gain_g = message.parameter1;
+			nvm_write_wb_param(nvm_read_wb_mode(),&tabWb,0);
 			vpu_wb_gain_adj ( message.parameter1, WBSEL_G );
 			break;
 
 		case VPU_CMD_BLUE_GAIN_DEF:
-			vpu_fac_pq_setting.colortemp_user.gain_b = message.parameter1;
+			//pvpu_fac_pq->colortemp_user.gain_b = message.parameter1;
+			tabWb.gain_b = message.parameter1;
+			nvm_write_wb_param(nvm_read_wb_mode(),&tabWb,0);
 			vpu_wb_gain_adj ( message.parameter1, WBSEL_B );
 			break;
 
 		case VPU_CMD_PRE_RED_OFFSET_DEF:
-			vpu_fac_pq_setting.colortemp_user.pre_offset_r = message.parameter1;
+			//pvpu_fac_pq->colortemp_user.pre_offset_r = message.parameter1;
+			tabWb.pre_offset_r = message.parameter1;
+			nvm_write_wb_param(nvm_read_wb_mode(),&tabWb,0);
 			vpu_wb_offset_adj ( message.parameter1, WBSEL_R, WBOFFSET_PRE );
 			break;
 
 		case VPU_CMD_PRE_GREEN_OFFSET_DEF:
-			vpu_fac_pq_setting.colortemp_user.pre_offset_g = message.parameter1;
+			//pvpu_fac_pq->colortemp_user.pre_offset_g = message.parameter1;
+			tabWb.pre_offset_g = message.parameter1;
+			nvm_write_wb_param(nvm_read_wb_mode(),&tabWb,0);
 			vpu_wb_offset_adj ( message.parameter1, WBSEL_G, WBOFFSET_PRE );
 			break;
 
 		case VPU_CMD_PRE_BLUE_OFFSET_DEF:
-			vpu_fac_pq_setting.colortemp_user.pre_offset_b = message.parameter1;
+			//pvpu_fac_pq->colortemp_user.pre_offset_b = message.parameter1;
+			tabWb.pre_offset_b = message.parameter1;
+			nvm_write_wb_param(nvm_read_wb_mode(),&tabWb,0);
 			vpu_wb_offset_adj ( message.parameter1, WBSEL_B, WBOFFSET_PRE );
 			break;
 
 		case VPU_CMD_POST_RED_OFFSET_DEF:
-			vpu_fac_pq_setting.colortemp_user.post_offset_r = message.parameter1;
+			//pvpu_fac_pq->colortemp_user.post_offset_r = message.parameter1;
+			tabWb.post_offset_r = message.parameter1;
+			nvm_write_wb_param(nvm_read_wb_mode(),&tabWb,0);
 			vpu_wb_offset_adj ( message.parameter1, WBSEL_R, WBOFFSET_POST );
 			break;
 
 		case VPU_CMD_POST_GREEN_OFFSET_DEF:
-			vpu_fac_pq_setting.colortemp_user.post_offset_g = message.parameter1;
+			//pvpu_fac_pq->colortemp_user.post_offset_g = message.parameter1;
+			tabWb.post_offset_g = message.parameter1;
+			nvm_write_wb_param(nvm_read_wb_mode(),&tabWb,0);
 			vpu_wb_offset_adj ( message.parameter1, WBSEL_G, WBOFFSET_POST );
 			break;
 
 		case VPU_CMD_POST_BLUE_OFFSET_DEF:
-			vpu_fac_pq_setting.colortemp_user.post_offset_b = message.parameter1;
+			//pvpu_fac_pq->colortemp_user.post_offset_b = message.parameter1;
+			tabWb.post_offset_b = message.parameter1;
+			nvm_write_wb_param(nvm_read_wb_mode(),&tabWb,0);
 			vpu_wb_offset_adj ( message.parameter1, WBSEL_B, WBOFFSET_POST );
 			break;
 
@@ -258,6 +300,11 @@ void vpp_process_debug ( vpu_message_t message )
 
 void vpp_process_pq_getting ( vpu_message_t message, int *rets )
 {
+	//vpu_fac_pq_t* pvpu_fac_pq = &vpu_fac_pq_setting;
+	vpu_picmod_table_t picTab;
+
+	nvm_read_pic_param(nvm_read_pic_mode(),&picTab);
+
 	switch ( message.cmd_id & 0x7f ) {
 		case VPU_CMD_NATURE_LIGHT_EN:
 			break;
@@ -267,26 +314,31 @@ void vpp_process_pq_getting ( vpu_message_t message, int *rets )
 
 		case VPU_CMD_BRIGHTNESS:
 		case VPU_CMD_BRIGHTNESS_DEF:
-			rets[0] = vpu_fac_pq_setting.bri_ui;
+			//rets[0] = pvpu_fac_pq->bri_ui;
+			rets[0] = picTab.bright;
 			break;
 
 		case VPU_CMD_CONTRAST:
 		case VPU_CMD_CONTRAST_DEF:
-			rets[0] = vpu_fac_pq_setting.con_ui;
+			//rets[0] = pvpu_fac_pq->con_ui;
+			rets[0] = picTab.contrast;
 			break;
 
 		case VPU_CMD_BACKLIGHT:
 		case VPU_CMD_BACKLIGHT_DEF:
-			rets[0] = vpu_fac_pq_setting.backlight_ui;
+			//rets[0] = pvpu_fac_pq->backlight_ui;
+			rets[0] = nvm_read_backlight_level();
 			break;
 
 		case VPU_CMD_SATURATION:
 		case VPU_CMD_COLOR_DEF:
-			rets[0] = vpu_fac_pq_setting.satu_ui;
+			//rets[0] = pvpu_fac_pq->satu_ui;
+			rets[0] = picTab.saturation;
 			break;
 
 		case VPU_CMD_HUE_DEF:
-			rets[0] = vpu_fac_pq_setting.hue_ui;
+			//rets[0] = pvpu_fac_pq->hue_ui;
+			rets[0] = picTab.hue;
 			break;
 
 		case VPU_CMD_DYNAMIC_CONTRAST:
@@ -294,21 +346,24 @@ void vpp_process_pq_getting ( vpu_message_t message, int *rets )
 			break;
 
 		case VPU_CMD_PICTURE_MODE:
-			rets[0] = vpu_fac_pq_setting.picmod;
+			//rets[0] = pvpu_fac_pq->picmod;
+			rets[0] = nvm_read_pic_mode();
 			break;
 
 		case VPU_CMD_PATTERN_EN:
 			break;
 
 		case VPU_CMD_PATTEN_SEL:
-			rets[0] = vpu_fac_pq_setting.test_pattern_mod;
+			//rets[0] = pvpu_fac_pq->test_pattern_mod;
+			rets[0] = nvm_read_pattern_mode();
 			break;
 
 		case VPU_CMD_USER_GAMMA:
 			break;
 
 		case VPU_CMD_COLOR_TEMPERATURE_DEF:
-			rets[0] = vpu_fac_pq_setting.colortemp_mod;
+			//rets[0] = pvpu_fac_pq->colortemp_mod;
+			rets[0] = nvm_read_wb_mode();
 			break;
 
 		case CMD_HDR_KNEE_FACTOR:
@@ -333,6 +388,12 @@ int temp_id;
 int temp_value;
 void vpp_process_pq_setting ( vpu_message_t message )
 {
+	//vpu_fac_pq_t* pvpu_fac_pq = &vpu_fac_pq_setting;
+	vpu_picmod_e curPicMode = nvm_read_pic_mode();
+
+	vpu_picmod_table_t picTab;
+	nvm_read_pic_param(curPicMode,&picTab);
+
 	//printf(" %s id=%d \n",__func__,message.cmd_id);
 	switch ( message.cmd_id ) {
 		case VPU_CMD_NATURE_LIGHT_EN:
@@ -340,7 +401,7 @@ void vpp_process_pq_setting ( vpu_message_t message )
 			break;
 
 		case VPU_CMD_BACKLIGHT_EN:
-			enable_backlight ( message.parameter1 & 0x1 );
+			backlight_power_ctrl ( message.parameter1 & 0x1 );
 			break;
 
 		/*case VPU_CMD_AUTO_ELEC_MODE:
@@ -348,20 +409,25 @@ void vpp_process_pq_setting ( vpu_message_t message )
 		 break;*/
 		case VPU_CMD_BRIGHTNESS:
 		case VPU_CMD_BRIGHTNESS_DEF:
-			vpu_fac_pq_setting.bri_ui = message.parameter1;
+			//pvpu_fac_pq->bri_ui = message.parameter1;
 			fbc_adj_bri ( message.parameter1 );
+			picTab.bright = message.parameter1;
+			nvm_write_pic_param(curPicMode,&picTab,0);
 			break;
 
 		case VPU_CMD_CONTRAST:
 		case VPU_CMD_CONTRAST_DEF:
-			vpu_fac_pq_setting.con_ui = message.parameter1;
+			//pvpu_fac_pq->con_ui = message.parameter1;
 			fbc_adj_con ( message.parameter1 );
+			picTab.contrast = message.parameter1;
+			nvm_write_pic_param(curPicMode,&picTab,0);
 			break;
 
 		case VPU_CMD_BACKLIGHT:
 		case VPU_CMD_BACKLIGHT_DEF:
-			vpu_fac_pq_setting.backlight_ui = message.parameter1;
+			//pvpu_fac_pq->backlight_ui = message.parameter1;
 			vpu_backlight_adj ( message.parameter1 & 0xff, timing_cur );
+			nvm_write_backlight_level(message.parameter1,0);
 			break;
 
 		case VPU_CMD_SWITCH_5060HZ:
@@ -370,13 +436,17 @@ void vpp_process_pq_setting ( vpu_message_t message )
 
 		case VPU_CMD_SATURATION:
 		case VPU_CMD_COLOR_DEF:
-			vpu_fac_pq_setting.satu_ui = message.parameter1;
+			//pvpu_fac_pq->satu_ui = message.parameter1;
 			fbc_adj_sat ( message.parameter1 & 0xff );
+			picTab.saturation = message.parameter1;
+			nvm_write_pic_param(curPicMode,&picTab,0);
 			break;
 
 		case VPU_CMD_HUE_DEF:
-			vpu_fac_pq_setting.hue_ui = message.parameter1;
+			//pvpu_fac_pq->hue_ui = message.parameter1;
 			fbc_adj_hue ( message.parameter1 & 0xff );
+			picTab.hue = message.parameter1;
+			nvm_write_pic_param(curPicMode,&picTab,0);
 			break;
 
 		case VPU_CMD_DYNAMIC_CONTRAST:
@@ -385,9 +455,11 @@ void vpp_process_pq_setting ( vpu_message_t message )
 			break;
 
 		case VPU_CMD_PICTURE_MODE:
-			vpu_fac_pq_setting.picmod = message.parameter1;
-			vpu_picmod_adj ( ( vpu_picmod_t ) message.parameter1 & 0xff );
-			picmod_cur = ( vpu_picmod_t ) message.parameter1;
+			//pvpu_fac_pq->picmod = message.parameter1;
+			curPicMode = message.parameter1;
+			nvm_write_pic_mode(curPicMode,0);
+			vpu_pq_picmod_adj ( ( vpu_picmod_e ) message.parameter1 & 0xff );
+			picmod_cur = ( vpu_picmod_e ) message.parameter1;
 			break;
 
 		case VPU_CMD_PATTERN_EN:
@@ -403,9 +475,12 @@ void vpp_process_pq_setting ( vpu_message_t message )
 			break;
 
 		case VPU_CMD_COLOR_TEMPERATURE_DEF:
-			vpu_fac_pq_setting.colortemp_mod = ( vpu_colortemp_t ) message.parameter1;
-			vpu_colortemp_adj ( ( vpu_colortemp_t ) message.parameter1 );
-			colortemp_cur = ( vpu_colortemp_t ) message.parameter1;
+			//pvpu_fac_pq->colortemp_mod = ( vpu_wb_e ) message.parameter1;
+			nvm_write_wb_mode(( vpu_wb_e ) message.parameter1, 1);
+			vpu_wb_t ptabWb ;
+			nvm_read_wb_param(( vpu_wb_e ) message.parameter1, &ptabWb);
+			vpu_colortemp_adj ( &ptabWb );
+			//colortemp_cur = ( vpu_wb_e ) message.parameter1;
 			break;
 
 		case VPU_CMD_GRAY_PATTERN:
@@ -443,6 +518,13 @@ void vpp_process_pq_setting ( vpu_message_t message )
 		case VPU_CMD_GAMMA_PATTERN:
 			vpp_set_gamma_pattern(message.parameter1, message.parameter2, message.parameter3);
 			break;
+
+		case CMD_DNLP_PRINTK:
+			#if K_DNLP_ON
+			dnlp_printk = message.parameter1;
+			#endif
+			break;
+
 		default:
 			vpp_process_wb_setting ( message );
 			break;
@@ -493,6 +575,8 @@ void vpp_process_top_getting ( vpu_message_t message, int *rets )
 }
 void vpp_process_top_setting ( vpu_message_t message )
 {
+	int temp;
+
 	switch ( message.cmd_id ) {
 		case VPU_CMD_INIT:
 			init_display();
@@ -507,22 +591,12 @@ void vpp_process_top_setting ( vpu_message_t message )
 			break;
 
 		case VPU_CMD_OUTPUT_MUX:
-			port_cur = ( vpu_outputmode_t ) message.parameter1;
-			set_vpu_output_mode ( port_cur );
-
-			if ( port_cur == T_1080P50HZ ) {
-				vclk_set_encl_lvds ( timing_cur, LVDS_PORTS );
-				set_LVDS_output ( LVDS_PORTS );
-
-			} else {
-#if (LOCKN_TYPE_SEL == LOCKN_TYPE_C)
-				vbyone_interrupt_enable ( 0 );
-#endif
-				vclk_set_encl_vx1 ( timing_cur, VX1_LANE_NUM, VX1_BYTE_NUM );
-				set_VX1_output ( VX1_LANE_NUM, VX1_BYTE_NUM, VX1_REGION_NUM, VX1_COLOR_FORMAT, timing_table[timing_cur].hactive, timing_table[timing_cur].vactive );
+			temp = ( enum panel_interface_e ) message.parameter1;
+			temp = (temp == 0) ? PANEL_IF_LVDS : PANEL_IF_VBYONE;
+			if (panel_if == temp) {
+				lcd_module_init();
+				panel_enable();
 			}
-			//panel signal output(phy init & enable)
-			lcd_phy_ctrl(1);
 
 			break;
 
@@ -623,6 +697,7 @@ void vpp_process ( vpu_message_t message, int *rets )
 		case CMD_HDR_KNEE_INTERPOLATION_MODE:
 		case CMD_HDR_KNEE_SETTING:
 		case VPU_CMD_GAMMA_PATTERN:
+		case CMD_DNLP_PRINTK:
 			vpp_process_pq ( message, rets );
 			break;
 
@@ -745,19 +820,6 @@ int do_vpp_debug ( cmd_tbl_t *cmdtp, int flag, int argc, char *argv[] )
 	}
 
 	cmd = argv[1];
-
-	if ( !strncmp ( cmd, "lockn", 5 ) ) {
-		cmd_id = strtoul ( argv[2], NULL, 10 );
-
-		if ( cmd_id == 0 ) {
-			lockn_en = 0;
-
-		} else {
-			lockn_en = 1;
-		}
-
-		return -1;
-	}
 
 	vpp_debug = malloc ( 4 );
 	cmd_id = strtoul ( argv[1], NULL, 10 );
@@ -882,6 +944,7 @@ int vpp_check_cmd_is_supported ( int cmd )
 		case CMD_HDR_KNEE_INTERPOLATION_MODE:
 		case CMD_HDR_KNEE_SETTING:
 		case VPU_CMD_GAMMA_PATTERN:
+		case CMD_DNLP_PRINTK:
 			return 1;
 
 		default:
@@ -893,5 +956,142 @@ void register_vpp_task_mid()
 {
 	vpp_task_id = RegisterTask ( vpp_task_handle, NULL, 0, TASK_PRIORITY_VPP );
 	RegisterCmd ( &vpp_cmd_list, vpp_task_id, INPUT_CEC | INPUT_UART_HOST | INPUT_UART_CONSOLE | INPUT_VPP_DEBUG, vpp_check_cmd_is_supported, vpp_handle_cmd );
+}
+
+int get_factory_mode(void){
+	return 0;//factory_mode_enable;
+}
+
+unsigned int vpp_cmd_user_setting ( unsigned char *s )
+{
+	switch ( CmdID ( s ) ) {
+		case VPU_CMD_NATURE_LIGHT_EN:
+		case VPU_CMD_BACKLIGHT_EN:
+		case VPU_CMD_BRIGHTNESS:
+		case VPU_CMD_CONTRAST:
+		case VPU_CMD_BACKLIGHT:
+		case VPU_CMD_SATURATION:
+		case VPU_CMD_DYNAMIC_CONTRAST:
+		case VPU_CMD_PICTURE_MODE:
+		case VPU_CMD_PATTERN_EN:
+		case VPU_CMD_PATTEN_SEL:
+		case VPU_CMD_USER_GAMMA:
+		case VPU_CMD_COLOR_TEMPERATURE_DEF:
+		case VPU_CMD_BRIGHTNESS_DEF:
+		case VPU_CMD_CONTRAST_DEF:
+		case VPU_CMD_COLOR_DEF:
+		case VPU_CMD_HUE_DEF:
+		case VPU_CMD_BACKLIGHT_DEF:
+		case VPU_CMD_AUTO_LUMA_EN:
+
+		/* case VPU_CMD_AUTO_ELEC_MODE: */
+		/* wb */
+		case VPU_CMD_RED_GAIN_DEF:
+		case VPU_CMD_GREEN_GAIN_DEF:
+		case VPU_CMD_BLUE_GAIN_DEF:
+		case VPU_CMD_PRE_RED_OFFSET_DEF:
+		case VPU_CMD_PRE_GREEN_OFFSET_DEF:
+		case VPU_CMD_PRE_BLUE_OFFSET_DEF:
+		case VPU_CMD_POST_RED_OFFSET_DEF:
+		case VPU_CMD_POST_GREEN_OFFSET_DEF:
+		case VPU_CMD_POST_BLUE_OFFSET_DEF:
+		case VPU_CMD_WB:
+
+		/* audio */
+		case AUDIO_CMD_SET_SOURCE:
+		case AUDIO_CMD_SET_MASTER_VOLUME:
+		case AUDIO_CMD_SET_CHANNEL_VOLUME:
+		case AUDIO_CMD_SET_SUBCHANNEL_VOLUME:
+		case AUDIO_CMD_SET_MASTER_VOLUME_GAIN:
+		case AUDIO_CMD_SET_CHANNEL_VOLUME_INDEX:
+		case AUDIO_CMD_SET_VOLUME_BAR:
+		case AUDIO_CMD_SET_MUTE:
+		case AUDIO_CMD_SET_EQ_MODE:
+		case AUDIO_CMD_SET_BALANCE:
+			//Qy temp g_user_setting.change_flag = 1;
+			break;
+
+		case VPU_CMD_ENABLE:
+			int *params = GetParams ( s );
+
+			systems_t* psystem = &(g_nvm_user.system);
+
+			if ( params != NULL ) {
+				switch ( params[0] ) {
+					case VPU_MODULE_GAMMA:
+						psystem->vpp.gamma_enable = params[1];
+						break;
+
+					case VPU_MODULE_WB:
+						psystem->vpp.wb_enable = params[1];
+						break;
+
+					case VPU_MODULE_CM2:
+						psystem->vpp.cm2_enable = params[1];
+						break;
+
+					case VPU_MODULE_DNLP:
+						psystem->vpp.dnlp_enable = params[1];
+						break;
+
+					default:
+						break;
+				}
+
+				free ( params );
+				params = NULL;
+				//Qy temp g_user_setting.change_flag = 1;
+			}
+
+			break;
+
+		default:
+			break;
+	}
+
+	return 0;
+}
+
+unsigned char vpp_cmd_read_user_setting ( unsigned char *s, int *returns )
+{
+	int *params = GetParams ( s );
+
+	if ( params == NULL ) {
+		return 1;
+	}
+
+	systems_t* psystem = &(g_nvm_user.system);
+
+	switch ( CmdID ( s ) ) {
+		case ( VPU_CMD_ENABLE | VPU_CMD_READ ) :
+			switch ( params[0] ) {
+				case VPU_MODULE_GAMMA:
+					returns[0] = psystem->vpp.gamma_enable;
+					break;
+
+				case VPU_MODULE_WB:
+					returns[0] = psystem->vpp.wb_enable;
+					break;
+
+				case VPU_MODULE_CM2:
+					returns[0] = psystem->vpp.cm2_enable;
+					break;
+
+				case VPU_MODULE_DNLP:
+					returns[0] = psystem->vpp.dnlp_enable;
+					break;
+
+				default:
+					break;
+			}
+
+			break;
+
+		default:
+			break;
+	}
+
+	free ( params );
+	return 0;
 }
 

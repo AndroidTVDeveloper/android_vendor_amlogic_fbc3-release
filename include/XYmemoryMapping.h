@@ -67,7 +67,7 @@ struct codec_control {
 #define MAX_SOURCE	4
 
 
-struct audio_control {
+typedef struct audio_control {
 	unsigned char source;
 	unsigned char mute_state;
 	unsigned char master_volume;
@@ -80,7 +80,7 @@ struct audio_control {
 	unsigned char EQ_mode;
 	unsigned char balance;
 	char master_volume_gain;
-};
+}audio_control_t;
 
 
 void register_audio_save ( save_parameter func );

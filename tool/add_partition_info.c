@@ -6,7 +6,7 @@
 #include <board_config.h>
 #include "../include/spi_regional_division.h"
 #include "../rsa_key/signature2048_1.h"
-
+#include "../include/version_autogenarated.h"
 
 //SECTION_FIRST_BOOT
 #define FIRST_BOOT_CODE_OFFSET FIRST_BOOT_OFFSET
@@ -15,8 +15,8 @@
 #define FIRST_BOOT_DATA_SIZE (1024 * 4)
 
 //SECTION_0
-#define SECOND_BOOT_CODE_OFFSET (SECTION_0_OFFSET + CHECK_INFO_SIZE)
-#define SECOND_BOOT_CODE_SIZE (1024 * 38 - CHECK_INFO_SIZE)
+#define SECOND_BOOT_CODE_OFFSET SECTION_0_OFFSET
+#define SECOND_BOOT_CODE_SIZE (1024 * 38)
 #define SECOND_BOOT_DATA_OFFSET (SECOND_BOOT_CODE_OFFSET + SECOND_BOOT_CODE_SIZE)
 #define SECOND_BOOT_DATA_SIZE (1024 * 6)
 
@@ -31,7 +31,7 @@
 #define UPDATE_DATA_SIZE (1024 * 24)
 
 #define MAIN_CODE_OFFSET (UPDATE_DATA_OFFSET + UPDATE_DATA_SIZE)
-#define MAIN_CODE_SIZE (1024 * 128)
+#define MAIN_CODE_SIZE (1024 * 192)
 #define MAIN_DATA_OFFSET (MAIN_CODE_OFFSET + MAIN_CODE_SIZE)
 #define MAIN_DATA_SIZE (1024 * 56)
 #define MAIN_SPI_CODE_OFFSET (MAIN_DATA_OFFSET + MAIN_DATA_SIZE)
@@ -40,10 +40,8 @@
 #define MAIN_RO_DATA_SIZE (1024 * 180)
 #define MAIN_AUDIO_PARAM_OFFSET (MAIN_RO_DATA_OFFSET + MAIN_RO_DATA_SIZE)
 #define MAIN_AUDIO_PARAM_SIZE (1024 * 8)
-#define MAIN_PQ_PARAM_OFFSET (MAIN_AUDIO_PARAM_OFFSET + MAIN_AUDIO_PARAM_SIZE)
-#define MAIN_PQ_PARAM_SIZE (1024 * 44)
-#define MAIN_RESERVE_PARAM_OFFSET (MAIN_PQ_PARAM_OFFSET + MAIN_PQ_PARAM_SIZE)
-#define MAIN_RESERVE_PARAM_SIZE (1024 * 24)
+#define MAIN_SYS_PARAM_OFFSET (MAIN_AUDIO_PARAM_OFFSET + MAIN_AUDIO_PARAM_SIZE)
+#define MAIN_SYS_PARAM_SIZE (1024 * 4)
 
 
 struct rsa_public_key {
@@ -60,12 +58,12 @@ struct rsa_public_key {
 struct rsa_public_key rsa_key =
 #include "../rsa_key/rsa2048_pkey_1.h"
 
-
+static char *if_name=NULL;
 static char *optstring = "i:o:t:s:";
 static struct option long_options[] = {
 	{"input", required_argument, NULL, 'i'},
 	{"output", required_argument, NULL, 'o'},
-	{"t", required_argument, NULL, 't'},
+	{"type", required_argument, NULL, 't'},
 	{"size", required_argument, NULL, 's'},
 };
 /*
@@ -135,6 +133,28 @@ int file_crc(char *file_name, unsigned int *crc)
 	return 0;
 }
 
+static int getFileSize ( const char *file_name )
+{
+	int tmp_len = 0;
+	FILE *fp = NULL;
+
+	if ( file_name == NULL || strlen ( file_name ) == 0 ) {
+		return 0;
+	}
+
+	fp = fopen ( file_name, "rb" );
+
+	if ( fp == NULL ) {
+		return 0;
+	}
+
+	fseek ( fp, 0, SEEK_END );
+	tmp_len = ftell ( fp );
+	fclose ( fp );
+	fp = NULL;
+	return tmp_len;
+}
+
 int get_partition(char *of_name)
 {
 	int partition =-1;
@@ -167,24 +187,28 @@ void set_partition_info( int partition, partition_info_t *info )
 			info->code_size = FIRST_BOOT_CODE_SIZE;
 			info->data_offset = FIRST_BOOT_DATA_OFFSET;
 			info->data_size = FIRST_BOOT_DATA_SIZE;
+			strcpy(info->name, "first boot");
 			break;
 		case PARTITION_SECOND_BOOT:
 			info->code_offset = SECOND_BOOT_CODE_OFFSET;
 			info->code_size = SECOND_BOOT_CODE_SIZE;
 			info->data_offset = SECOND_BOOT_DATA_OFFSET;
 			info->data_size = SECOND_BOOT_DATA_SIZE;
+			strcpy(info->name, "second boot");
 			break;
 		case PARTITION_SUSPEND:
 			info->code_offset = SUSPEND_CODE_OFFSET;
 			info->code_size = SUSPEND_CODE_SIZE;
 			info->data_offset = SUSPEND_DATA_OFFSET;
 			info->data_size = SUSPEND_DATA_SIZE;
+			strcpy(info->name, "suspend");
 			break;
 		case PARTITION_UPDATE:
 			info->code_offset = UPDATE_CODE_OFFSET;
 			info->code_size = UPDATE_CODE_SIZE;
 			info->data_offset = UPDATE_DATA_OFFSET;
 			info->data_size = UPDATE_DATA_SIZE;
+			strcpy(info->name, "update");
 			break;
 		case PARTITION_MAIN:
 			info->code_offset = MAIN_CODE_OFFSET;
@@ -197,22 +221,24 @@ void set_partition_info( int partition, partition_info_t *info )
 			info->readonly_size = MAIN_RO_DATA_SIZE;
 			info->audio_param_offset = MAIN_AUDIO_PARAM_OFFSET;
 			info->audio_param_size = MAIN_AUDIO_PARAM_SIZE;
-			info->pq_param_offset = MAIN_PQ_PARAM_OFFSET;
-			info->pq_param_size = MAIN_PQ_PARAM_SIZE;
-			info->reserve_param_offset = MAIN_RESERVE_PARAM_OFFSET;
-			info->reserve_param_size = MAIN_RESERVE_PARAM_SIZE;
+			info->sys_param_offset = MAIN_SYS_PARAM_OFFSET;
+			info->sys_param_size = MAIN_SYS_PARAM_SIZE;
+			strcpy(info->name, "main");
 			break;
 		case PARTITION_PQ:
 			info->data_offset = PQ_BINARY_START;
-			info->data_size = FBC_USER_START - PQ_BINARY_START;
+			info->data_size = getFileSize(if_name);
+			strcpy(info->name, "pq");
 			break;
 		case PARTITION_USER:
 			info->data_offset = FBC_USER_START;
 			info->data_size = FBC_USER_SIZE;
+			strcpy(info->name, "user");
 			break;
 		case PARTITION_FACTORY:
 			info->data_offset = FBC_FACTORY_START;
 			info->data_size = FBC_FACTORY_SIZE;
+			strcpy(info->name, "factory");
 			break;
 		default:
 			break;
@@ -234,6 +260,7 @@ int main ( int argc, char *argv[] )
 		switch ( val ) {
 			case 'i':
 				file_crc(optarg, &crc);
+				if_name = optarg;
 				break;
 			case 'o':
 				of_name = optarg;
@@ -269,6 +296,10 @@ int main ( int argc, char *argv[] )
 	memset ( buff, '\0', of_size );
 	if (!strcmp ( "key.bin", of_name )) {
 		memcpy ( buff, &rsa_key, sizeof(rsa_key) );
+		*(unsigned int *)(buff+LAYOUT_VERSION_OFFSET) = LAYOUT_VERSION;
+		*(unsigned int *)(buff+LAYOUT_VERSION_OFFSET+64) = (int)(FBC_VERSION_MAIN & 0xff) << 24
+														| (int)(FBC_VERSION_SUB1 & 0xff) << 16
+														| (int)(FBC_VERSION_SUB2 & 0xff) << 8;
 	}
 	else if (!strncmp ( "dummy", of_name, 5 )) {
 	}

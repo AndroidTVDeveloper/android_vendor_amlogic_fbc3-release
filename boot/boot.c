@@ -27,8 +27,6 @@ typedef void ( *main_entry ) ( void );
 
 int __attribute__ ( ( section ( ".second.boot.entry" ) ) ) second_boot ( int boot_flag )
 {
-	unsigned int check_info = 0;
-
 	/* copy_data_from_spi_to_sram2(BOOT_DATA_BASE, BOOT_DATA_SIZE>>2); */
 	serial_init ( 0 );
 	serial_init ( 2 );
@@ -96,6 +94,7 @@ int __attribute__ ( ( section ( ".second.boot.entry" ) ) ) second_boot ( int boo
 	reset_watchdog();
 
 	if ( REBOOT_FLAG_SUSPEND == boot_flag ) {
+		typedef void (*suspend)();
 		if (copy_partition_to_ccm(SECTION_0, PARTITION_SUSPEND)) {
 			printf("suspend crc error!\n");
 			reboot(REBOOT_FLAG_FROM_WATCHDOG);
@@ -103,6 +102,7 @@ int __attribute__ ( ( section ( ".second.boot.entry" ) ) ) second_boot ( int boo
 		else {
 			serial_puts ( "enter suspend!\n" );
 			disable_watchdog();
+			((suspend)ICCM_BASE)();
 			return 0;
 		}
 	}
@@ -128,11 +128,6 @@ int __attribute__ ( ( section ( ".second.boot.entry" ) ) ) second_boot ( int boo
 		return 0;
 
 	} else {
-		if (check_image_info(SECTION_0, PARTITION_MAIN)) {
-			printf ( "main img is bad.\n" );
-			reboot ( REBOOT_FLAG_MAIN_ERROR );
-		}
-
 		if (copy_partition_to_ccm(SECTION_0, PARTITION_MAIN)) {
 			printf("main crc error!\n");
 			reboot(REBOOT_FLAG_FROM_WATCHDOG);

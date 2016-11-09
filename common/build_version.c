@@ -4,9 +4,6 @@
 
 #include <version.h>
 
-#define FBC_VERSION_MAIN    2
-#define FBC_VERSION_SUB1    1
-#define FBC_VERSION_SUB2    0
 static char versioninfo[256] = "N/A";
 static long long version_serial;
 static char gitversionstr[256] = "N/A";

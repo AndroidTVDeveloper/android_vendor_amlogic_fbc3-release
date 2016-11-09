@@ -6,8 +6,8 @@ else
   endif
 endif
 
+include ./version.mk
 PRODUCT = fbc-main
-VERSION = v1.0
 VERSION_FILE = version_autogenarated.h
 
 LD_LIB_PATH=$(ARC_TOOLCHAIN_PATH)/../lib/a6
@@ -100,17 +100,17 @@ mem_code_size : sections_info.asm
 	./get_section_size.sh sections_info.asm mm_size 10 .start .text .fini .init .plt
 
 spi_code_size : sections_info.asm
-	./get_section_size.sh sections_info.asm ms_size 1091198976 .running.on.spi .spi.text
+	./get_section_size.sh sections_info.asm ms_size 1091264512 .running.on.spi .spi.text
 
 spi_main: clean main.elf mem_code_size spi_code_size
 	$(CP) main.elf rom.elf
 	$(STRIP) $(STRIP_FALGS) rom.elf
 	$(DUMPELF) $(DUMP_FLAGS) rom.elf > rom.asm
 	$(ELF2BIN) rom.elf rom_code_orig.bin -b0x0 -t$(main_mem_code_size)
-	$(ELF2BIN) rom.elf rs_code_orig.bin -b0x410A6000 -t$(main_spi_code_size)
+	$(ELF2BIN) rom.elf rs_code_orig.bin -b0x410B6000 -t$(main_spi_code_size)
 	$(OBJCOPY) $(COPY_FLAGS) rom.elf -o rom_rodata_orig.bin -cl
 	$(OBJCOPY) $(COPY_FLAGS) rom.elf -o rom_data_orig.bin -cd
-	$(CP) ./project/$(PANEL_PQ) ./project/rom_pqparam
+	$(CP) ./project/$(board)/pq/$(PANEL_PQ) ./project/rom_pqparam
 	$(MK) -C tool all
 	$(MK) -f makefile.rom
 
@@ -130,24 +130,22 @@ spi_header:
 	./add_partition_info -i boot/second_boot_code.bin -i boot/second_boot_data.bin -o pi_second_boot.bin -s $(PARTITION_INFO_SIZE)
 	./add_partition_info -i boot/suspend_code.bin -i boot/suspend_data.bin -o pi_suspend.bin -s $(PARTITION_INFO_SIZE)
 	./add_partition_info -i boot/update_code.bin -i boot/update_data.bin -o pi_update.bin -s $(PARTITION_INFO_SIZE)
-	./add_partition_info -i rom_code.bin -i rom_data.bin -o pi_main.bin  -s $(PARTITION_INFO_SIZE)
-	./add_partition_info -o pi_pq.bin -s $(PARTITION_INFO_SIZE)
+	./add_partition_info -i rom.bin -o pi_main.bin  -s $(PARTITION_INFO_SIZE)
+	./tool/bin_op -i project/$(board)/pq -t pq -o pq.bin
+	./add_partition_info -i pq.bin -o pi_pq.bin -s $(PARTITION_INFO_SIZE)
 	./add_partition_info -o pi_user.bin -s $(PARTITION_INFO_SIZE)
 	./add_partition_info -o pi_factory.bin -s $(PARTITION_INFO_SIZE)
-	./add_partition_info -o dummy_partition_info.bin -s $(PARTITION_INFO_SIZE)
-	./add_partition_info -o dummy_section_1_info.bin -s $(SECTION_INFO_SIZE)
-	cat key.bin pi_first_boot.bin pi_second_boot.bin pi_suspend.bin pi_update.bin pi_main.bin pi_pq.bin \
-	pi_user.bin pi_factory.bin dummy_partition_info.bin dummy_section_1_info.bin >> par_info.bin
+	cat pi_second_boot.bin pi_suspend.bin pi_update.bin pi_main.bin pi_pq.bin pi_user.bin pi_factory.bin >> pi_section_0.bin
+	head -c $(PARTITION_INFO_SIZE) /dev/zero >> pi_section_0.bin
 
 	@echo "generate head.sha256 that write efuse, 520 = sizeof (struct rsa_public_key)"
-	dd if=par_info.bin of=rsa_key.bin bs=520 count=1
+	dd if=key.bin of=rsa_key.bin bs=520 count=1
 	openssl dgst -sha256 -binary -out rsa_key/head.sha256 rsa_key.bin
 
 spi: spi_main spi_boot spi_header
-	./tool/bin_op -i project -t pq -o pq.bin
-	cat par_info.bin boot/boot.bin rom.bin >> spi.bin
-	./add_partition_info -o dummy_section_1.bin -s $(SECTION_SIZE)
-	cat spi.bin dummy_section_1.bin pq.bin >> spi_pq.bin
+	cat boot/second_boot.bin boot/suspend.bin boot/update.bin rom.bin >> section_0.bin
+	cat key.bin pi_first_boot.bin pi_section_0.bin pi_section_0.bin boot/first_boot.bin section_0.bin section_0.bin >> spi.bin
+	cat spi.bin pq.bin >> spi_pq.bin
 	./tool/bin_op -i spi_pq.bin -t all -o spi_all.bin
 	$(MKDIR) out
 	@split -b 64k -d spi.bin ./out/spi.bin.
@@ -156,7 +154,9 @@ spi: spi_main spi_boot spi_header
 version.info:
 	@$(RM) include/$(VERSION_FILE)
 	@echo "#define PRODUCT_NAME \"$(PRODUCT)\"" > include/$(VERSION_FILE)
-	@echo "#define VERSION \"$(VERSION)\"" >> include/$(VERSION_FILE)
+	@echo "#define FBC_VERSION_MAIN $(FBC_VERSION_MAIN)" >> include/$(VERSION_FILE)
+	@echo "#define FBC_VERSION_SUB1 $(FBC_VERSION_SUB1)" >> include/$(VERSION_FILE)
+	@echo "#define FBC_VERSION_SUB2 $(FBC_VERSION_SUB2)" >> include/$(VERSION_FILE)
 	@echo "#define RELEASE_DATE \"$(RELEASE_DATE)\"" >> include/$(VERSION_FILE)
 	@echo "#define RELEASE_TIME \"$(RELEASE_TIME)\"" >> include/$(VERSION_FILE)
 	@echo "#define RELEASE_USER \"$(RELEASE_USER)\"" >> include/$(VERSION_FILE)

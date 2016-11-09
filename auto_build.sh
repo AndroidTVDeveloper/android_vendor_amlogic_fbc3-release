@@ -7,6 +7,7 @@ elif [ "$1" = "help" ];then
 	echo "You can build fbc via ./auto_build.sh board_name"
 	echo "board_name:"
 	echo "t111"
+	echo "t112"
 	echo "p350"
 	exit
 else
@@ -42,6 +43,8 @@ else
   echo "Use Metaware toolchain for ARC in $ARC_TOOLCHAIN_PATH."
 fi
 
+echo "Set environment variable"
+export PATH=$PATH:$(echo `pwd`)
 
 make clean
 if [ -z $build_op ];then

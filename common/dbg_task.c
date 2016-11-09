@@ -54,6 +54,7 @@ static int check_dbg_cmd_is_supported ( int cmd )
 		case CMD_GET_PROJECT_SELECT:
 		case CMD_SET_AUTO_BACKLIGHT_ONFF:
 		case CMD_GET_AUTO_BACKLIGHT_ONFF:
+		case FBC_REBOOT_UPGRADE_AUTO_SPEED:
 			return 1;
 
 		default:
@@ -77,23 +78,38 @@ static unsigned int handle_dbg_cmd ( unsigned char *s, int *rets )
 			params = GetParams ( s );
 
 			if ( params != NULL ) {
-				panel_suspend();
+				panel_disable();
 				reboot ( ( unsigned ) params[0] );
 				free ( params );
 				params = NULL;
 			}
 
 			break;
+		case FBC_REBOOT_UPGRADE_AUTO_SPEED:
+			params = GetParams ( s );
 
+			if ( params != NULL ) {
+				panel_disable();
+
+				save_custom_uart_params( 2, 0 );
+				save_custom_uart_params( 2, (unsigned) params[1]);
+
+				printf ("%s(), BaudRate:%d\n", __func__, (unsigned) params[1]);
+
+				reboot ( ( unsigned ) params[0] );
+				free ( params );
+				params = NULL;
+			}
+			break;
 		case FBC_USER_SETTING_DEFAULT:
-			clr_default_setting ( 0 );
+			load_default_user_setting ( 0 );
 			break;
 
 		case FBC_USER_SETTING_SET:
 			break;
 
 		case FBC_GET_HDCP_KEY:
-			char *key = read_HDCP_KEY();
+			char *key = nvm_read_hdcpkey();
 
 			if ( key != NULL ) {
 				for ( i = 0; i < Ret_NumParam ( s ); i++ ) {
@@ -110,10 +126,10 @@ static unsigned int handle_dbg_cmd ( unsigned char *s, int *rets )
 
 			if ( params != NULL ) {
 				if ( 0 == params[0] ) {
-					panel_suspend();
+					panel_disable();
 
 				} else if ( 1 == params[0] ) {
-					panel_resume();
+					panel_enable();
 				}
 
 				free ( params );
@@ -123,7 +139,7 @@ static unsigned int handle_dbg_cmd ( unsigned char *s, int *rets )
 			break;
 
 		case FBC_SUSPEND_POWER:
-			panel_suspend();
+			panel_disable();
 			reboot ( REBOOT_FLAG_SUSPEND );
 			break;
 
@@ -135,7 +151,7 @@ static unsigned int handle_dbg_cmd ( unsigned char *s, int *rets )
 				device[i] = s[i + 1];
 			}
 
-			write_device_id ( device );
+			nvm_write_device_id ( device );
 			free ( device );
 			break;
 
@@ -155,7 +171,7 @@ static unsigned int handle_dbg_cmd ( unsigned char *s, int *rets )
 				}
 
 				pFactorySn[j] = '\0';
-				write_factory_sn ( pFactorySn );
+				nvm_write_factory_sn ( pFactorySn );
 				free ( pFactorySn );
 				pFactorySn = NULL;
 			}
@@ -164,7 +180,7 @@ static unsigned int handle_dbg_cmd ( unsigned char *s, int *rets )
 
 		case CMD_GET_FACTORY_SN:
 			char *pReadFactorySn;
-			pReadFactorySn = read_factory_sn();
+			pReadFactorySn = nvm_read_factory_sn();
 			int len = strlen ( pReadFactorySn );
 			printf ( "\nget %d sn = %s\n", len, pReadFactorySn );
 
@@ -199,17 +215,17 @@ static unsigned int handle_dbg_cmd ( unsigned char *s, int *rets )
 
 			if ( params != NULL ) {
 				if ( params[0] == 0x1 ) {
-					clr_default_setting ( 1 );
+					load_default_user_setting ( 1 );
 
 				} else if ( params[0] == 0x2 ) {
 					clr_default_wb_setting();
 
 				} else if ( params[0] == 0x3 ) {
-					clr_default_setting ( 1 );
+					load_default_user_setting ( 1 );
 					clr_default_wb_setting();
 
 				} else {
-					clr_default_setting ( 1 );
+					load_default_user_setting ( 1 );
 					clr_default_wb_setting();
 				}
 
@@ -217,7 +233,7 @@ static unsigned int handle_dbg_cmd ( unsigned char *s, int *rets )
 				params = NULL;
 
 			} else {
-				clr_default_setting ( 1 );
+				load_default_user_setting ( 1 );
 				clr_default_wb_setting();
 			}
 
@@ -276,7 +292,7 @@ static unsigned int handle_dbg_cmd ( unsigned char *s, int *rets )
 
 		case CMD_DEVICE_ID:
 			char *device_id;
-			device_id = read_device_id();
+			device_id = nvm_read_device_id();
 			int n = strlen ( device_id );
 			printf ( "deviceid=%s\n", device_id );
 
@@ -382,28 +398,28 @@ static unsigned int handle_dbg_cmd ( unsigned char *s, int *rets )
 			params = GetParams ( s );
 
 			if ( params != NULL ) {
-				select_project_id ( params[0] );
+				nvm_switch_project_id ( params[0] );
 				free ( params );
 			}
 
 			break;
 
 		case CMD_GET_PROJECT_SELECT:
-			rets[0] = ( char ) read_project_id();
+			rets[0] = ( char ) nvm_read_project_id();
 			break;
 
 		case CMD_SET_AUTO_BACKLIGHT_ONFF:
 			params = GetParams ( s );
 
 			if ( params != NULL ) {
-				set_nature_lihgt_en ( params[0] );
+				nvm_write_nature_lihgt_en ( params[0] );
 				free ( params );
 			}
 
 			break;
 
 		case CMD_GET_AUTO_BACKLIGHT_ONFF:
-			rets[0] = get_nature_lihgt_en();
+			rets[0] = nvm_read_light_enable();
 			break;
 
 		default:

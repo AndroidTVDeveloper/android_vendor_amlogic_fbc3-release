@@ -14,6 +14,7 @@ typedef	long long int64_t;
 #define false 0
 #define true 1
 
+#if 0
 #define XVYCC_LUT_R_ADDR_PORT	0x315e
 #define XVYCC_LUT_R_DATA_PORT	0x315f
 #define XVYCC_LUT_G_ADDR_PORT	0x3160
@@ -22,6 +23,22 @@ typedef	long long int64_t;
 #define XVYCC_LUT_B_DATA_PORT	0x3163
 //#define XVYCC_INV_LUT_CTL		0x3164
 #define XVYCC_LUT_CTL			0x3165
+#endif
+
+
+typedef enum {
+	eHDR_MODE_HDR = 0,
+	eHDR_MODE_SDR = 1,
+	eHDR_MODE_AUTO = 2,
+	eHDR_MODE_OFF = 3,
+}eHDR_MODE;
+
+typedef enum {
+	eHDR_CHG_MD_HDR2HDR = 0,
+	eHDR_CHG_MD_HDR2SDR = 1,
+	eHDR_CHG_MD_SDR2HDR = 2,
+}eHDR_PRO_MODE;
+
 
 /* struct ve_dnlp_s          video_ve_dnlp; */
 
@@ -60,6 +77,14 @@ typedef	long long int64_t;
 
 #define CSC_ON              1
 #define CSC_OFF             0
+
+
+struct matrix_s {
+	u16 pre_offset[3];
+	u16 matrix[3][3];
+	u16 offset[3];
+	u16 right_shift;
+};
 
 struct vframe_master_display_colour_s {
 	u32 present_flag;
@@ -108,12 +133,15 @@ struct vinfo_s {
 
 enum vpp_matrix_csc_e {
 	VPP_MATRIX_NULL = 0,
-	VPP_MATRIX_RGB_YUV709 = 0x1,
-	VPP_MATRIX_YUV709_RGB = 0x2,
-	VPP_MATRIX_RGB_YUV2020 = 0x3,
-	VPP_MATRIX_YUV2020_RGB709_STM = 0X11,
-	VPP_MATRIX_YUV2020_RGB709_STD = 0X12,
-	VPP_MATRIX_YUV2020_RGB2020 = 0X13,
+	VPP_MATRIX_RGB_YUV601 = 0x1,
+	VPP_MATRIX_RGB_YUV709 = 0x11,
+	VPP_MATRIX_YUV709_RGB = 0x12,
+	VPP_MATRIX_YUV709F_RGB = 0x13,
+	VPP_MATRIX_YUV709_YUV709F = 0x14,
+	VPP_MATRIX_RGB_YUV2020 = 0x20,
+	VPP_MATRIX_YUV2020_RGB709_STM = 0X21,
+	VPP_MATRIX_YUV2020_RGB709_STD = 0X22,
+	VPP_MATRIX_YUV2020_RGB2020 = 0X23,
 	VPP_MATRIX_BT2020RGB_CUSRGB = 0x50,
 };
 
@@ -122,7 +150,11 @@ enum vpp_matrix_sel_e {
 	VPP_MATRIX_CSC1,/*input_signal*/
 };
 
-void amvecm_matrix_process(struct vframe_fbc *v_fbc);
-
+void amvecm_matrix_process(void);
+void hdr_get_info(void);
+void vpp_set_matrix(enum vpp_matrix_sel_e csc0_or_csc1,
+		unsigned int on,enum vpp_matrix_csc_e csc_mode,struct matrix_s *m);
+void hdr_init(void);
+void hdr_force_csc1(int csc1type);
 
 #endif

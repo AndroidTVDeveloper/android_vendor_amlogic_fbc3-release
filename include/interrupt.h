@@ -47,4 +47,6 @@ void DisableAllInterrupt ( void );
 
 void EnableAllInterrupt ( void );
 
+extern unsigned int in_irq(void);
+
 #endif //INTERRUPT_H

@@ -89,7 +89,18 @@ extern unsigned char cmd_state;
 extern int default_uart;
 extern void serial_putc ( const char c );
 
-extern struct audio_control audio_state;
+//extern audio_control_t audio_state;
+
+
+struct customParams_t
+{
+	unsigned port;
+	unsigned baudRate;
+};
+
+extern void enable_custom_baudRate(unsigned enable);
+void save_custom_uart_params(unsigned port, unsigned baudRate );
+struct customParams_t get_custom_uart_params( void );
 
 
 #endif

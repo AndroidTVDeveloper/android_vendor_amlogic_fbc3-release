@@ -19,7 +19,7 @@ unsigned char bl_mapping_iw7027[16] = {
 
 #define ARRAY_SIZE(array) (sizeof (array) / sizeof (array[0]))
 
-extern void config_ldim_pwm_vs(unsigned short pwm_freq, unsigned short pwm_duty);
+extern void config_ldim_pwm_vs(unsigned char index, unsigned short pwm_freq, unsigned short pwm_duty);
 
 unsigned char iw7019_ini_on[] = {
 	/*step1:*/
@@ -87,7 +87,7 @@ static void ldim_ctrl_port_init(void)
 	*P_PREG_PAD_GPIO3_EN_N &= ~(1 << 13);
 	*P_PREG_PAD_GPIO3_O &= ~(1 << 13);
 	/* init pwm_vsync */
-	//config_ldim_pwm_vs(120, 50); /* frequency(Hz), duty(%) */
+	//config_ldim_pwm_vs(1, 120, 50); /* pwm_index, frequency(Hz), duty(%) */
 
 	/*set LD_EN gpio as output pull_up: GPIOX_11*/
 	*P_PERIPHS_PIN_MUX_3 &= ~((1 << 11) | (1 << 19));
@@ -130,8 +130,8 @@ static struct ldim_dev_config_s iw7019_config = {
 	.fault_check = 0,
 	.write_check = 0,
 
-	.dim_min = 0xfff,
-	.dim_max = 0x7f,
+	.dim_min = 0x7f,
+	.dim_max = 0xfff,
 	.init_on_len = ARRAY_SIZE(iw7019_ini_on),
 	.init_off_len = 0,
 	.init_on = iw7019_ini_on,
@@ -156,8 +156,8 @@ static struct ldim_dev_config_s iw7027_config = {
 	.fault_check = 1,
 	.write_check = 1,
 
-	.dim_min = 0xff,
-	.dim_max = 0x10,
+	.dim_min = 0x10,
+	.dim_max = 0xff,
 	.init_on_len = 0,
 	.init_off_len = 0,
 	.init_on = NULL,

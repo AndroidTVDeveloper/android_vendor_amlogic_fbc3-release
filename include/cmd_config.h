@@ -20,7 +20,7 @@ FBC_BOOT_CMD (
 	"/N\n"
 	"This command will into suspend\n"
 );
-
+/*
 extern int do_test ( cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[] );
 FBC_BOOT_CMD (
 	load,	3,	0,	do_test,
@@ -28,7 +28,7 @@ FBC_BOOT_CMD (
 	"/N\n"
 	"This command will into suspend\n"
 );
-
+*/
 extern int do_mem_md ( cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[] );
 FBC_BOOT_CMD (
 	md,	5,	1,	do_mem_md,
@@ -114,7 +114,7 @@ FBC_BOOT_CMD (
 );
 extern int do_dnlp_debug ( cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[] );
 FBC_BOOT_CMD (
-	dnlp,	4,	0,	do_dnlp_debug,
+	dnlp,	10,	0,	do_dnlp_debug,
 	"dnlp",
 	""
 );
@@ -169,10 +169,6 @@ FBC_BOOT_CMD (
 	"bl set [level]          ---- set backlight level(0~255).\n"
 	"bl get                  ---- get backlight level.\n"
 	"bl status               ---- print bl status.\n"
-	"bl bypass [value]       ---- 0=bypass disable, 1=bypass enable.\n"
-	"bl pwm duty [value]     ---- set pwm duty(0~100), unit: hz.\n"
-	"bl pwm freq [value]     ---- set pwm frequency(unit: Hz).\n"
-	"bl pwm pol [value]      ---- set pwm pol: 0=negative, 1=positive.\n"
 );
 
 extern int do_panel_debug ( cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[] );
@@ -184,12 +180,9 @@ FBC_BOOT_CMD (
 	"lcd reset                 ---- reset panel.\n"
 	"lcd ss [level]            ---- set clk spread spectrum, 0=disable, 1~5=different level.\n"
 	"lcd phy [vswing] [preem]  ---- set phy vswing(0~7) & preemphasis(0~7)\n"
-	"lcd lvds [repack] [dual_port] [pn_swap] [port_swap]     ---- set lvds config.\n"
-	"lcd vbyone [lane_count] [region_num] [byte_mode]        ---- set vbyone config.\n"
 	"lcd info                  ---- print panel info.\n"
 	"lcd reg                   ---- print panel registers.\n"
 	"lcd dump                  ---- print panel info & registers.\n"
-	"lcd debug_print [value]   ---- set panel debug print, 0=disable, 1=enable.\n"
 );
 
 #ifdef ENABLE_IW7019
@@ -203,6 +196,7 @@ FBC_BOOT_CMD (
 	"iw7019 write [addr] [value] ---- iw7019 write.\n"
 	"iw7019 read [addr]          ---- iw7019 read.\n"
 	"iw7019 test [mode]          ---- iw7019 set test mode.\n"
+	"iw7019 status               ---- iw7019 set test mode.\n"
 );
 #endif
 
@@ -252,7 +246,7 @@ FBC_BOOT_CMD (
 
 extern int do_hdr_debug ( cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[] );
 FBC_BOOT_CMD (
-	hdr,	10,	0,	do_gamma_debug,
+	hdr,	10,	0,	do_hdr_debug,
 	"hdr",
 	""
 );
@@ -284,6 +278,7 @@ cmd_tbl_t *default_cmd[] = {
 	GET_CMD_ADDR_FROM_CNAME ( cri ), \
 	GET_CMD_ADDR_FROM_CNAME ( bl ), \
 	GET_CMD_ADDR_FROM_CNAME ( lcd ),
+	GET_CMD_ADDR_FROM_CNAME ( hdr ),
 #ifdef ENABLE_LOCAL_DIMMING
 	GET_CMD_ADDR_FROM_CNAME ( ldim ),
 #endif
@@ -302,7 +297,7 @@ cmd_tbl_t *default_cmd[] = {
 	GET_CMD_ADDR_FROM_CNAME ( md ),	\
 	GET_CMD_ADDR_FROM_CNAME ( mw ),	\
 	GET_CMD_ADDR_FROM_CNAME ( reboot ), \
-	GET_CMD_ADDR_FROM_CNAME ( load ),
+//	GET_CMD_ADDR_FROM_CNAME ( load ),
 #else
 	GET_CMD_ADDR_FROM_CNAME ( reboot ),
 #endif

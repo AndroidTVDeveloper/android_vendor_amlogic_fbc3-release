@@ -178,10 +178,12 @@ SAVE_CALLER_SAVED
 	bl Process_Irq      ; irq5
 	NOP
 	MOV      r0, r10
+	MOV      r10, 0x43
+	SR       0x00000001, [r10] ;clear LV1 status
 	NOP
 RESTORE_CALLER_SAVED
 	jal.f [ilink1];
-	
+
 inst_fail:
     MOV     r0, 0xfffffffc
     ST      ilink1, [r0]
@@ -212,6 +214,8 @@ SAVE_CALLER_SAVED
 	bl Process_Fiq      ; irq6
 	NOP
 	MOV      r0, r10
+	MOV      r10, 0x43
+	SR       0x00000002, [r10] ;clear LV2 status
 	NOP
 RESTORE_CALLER_SAVED
 	jal.f [ilink2];

@@ -44,6 +44,17 @@ struct menu_item_value_t {
 #define MENU_START_LINE 0
 #define MENU_START_POSITION 0
 
+#define eInfo_HideLogo		0x0001
+#define eInfo_ShowLogo		0x0002
+#define eInfo_HideInfo		0x0004
+#define eInfo_ShowNosignal	0x0008
+
+
+typedef struct info_pro{
+	int info_do;
+	int mode;
+}s_info_pro;
+
 extern void init_ui ( void );
 extern int UiGetHaveLogoFlag ( void );
 
@@ -68,5 +79,5 @@ extern void invalidate ( struct menu_item_t *last, struct menu_item_t *curr );
 extern void invalidateValue ( struct menu_item_t *item, int key );
 extern void invalidateInitValue ( void );
 extern void display_logo(void);
-
+extern void info_mode(int mode);
 #endif

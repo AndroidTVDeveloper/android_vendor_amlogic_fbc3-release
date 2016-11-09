@@ -98,7 +98,7 @@ static int data_stream_read ( update_ctrl_t *update_ctrl )
 
 		} else if ( rc_crc_state == update_ctrl->flag ) {
 			crc[i] = c;
-			update_ctrl->serial_dev->putc ( c );
+			serial_dev->putc ( c );
 			printfx ( "received crc: 0x%x\n", c );
 
 			if ( i == sizeof ( crc ) - 2 ) {
@@ -193,7 +193,11 @@ int handle_cmd ( update_ctrl_t *update_ctrl )
 		if ( update_ctrl->argv[1] && update_ctrl->argv[2] ) {
 			update_ctrl->s_offs = strtoul ( update_ctrl->argv[1], NULL, 16 );
 			update_ctrl->total = strtoul ( update_ctrl->argv[2], NULL, 16 );
-
+			if (illegal_address_check(update_ctrl->s_offs, update_ctrl->total)) {
+				printfx ( "illegal address: offset=%x, size=%x\n", update_ctrl->s_offs, update_ctrl->total);
+				send_response ( update_ctrl->serial_dev, CONFIG_ERROR_RESP );
+				return -1;
+			}
 		} else {
 			update_ctrl->serial_dev->puts ( "\ncmd format error!\n" );
 			init_update_ctrl_t ( update_ctrl );
@@ -334,6 +338,7 @@ int handle_update ( struct update_ctrl *ctrl )
 		spi_flash_erase ( ctrl->flash_dev, ctrl->s_offs, erase_size );
 		printfx ( "offs: 0x%x, len: 0x%x\n", ctrl->s_offs + ctrl->write_spi_cnt, ret );
 		wlen = spi_flash_write ( ctrl->flash_dev, ctrl->s_offs + ctrl->write_spi_cnt, ret, ctrl->buf );
+		//wlen = spi_flash_random_write ( ctrl->flash_dev, ctrl->s_offs + ctrl->write_spi_cnt, ret, ctrl->buf );
 		printfx ( "pre write offset: 0x%X, write size: 0x%X\n", ctrl->s_offs, erase_size );
 		ctrl->write_spi_cnt += ret;
 

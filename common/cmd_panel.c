@@ -3,6 +3,9 @@
 #include <command.h>
 #include <user_setting.h>
 #include <panel.h>
+#include <ui.h>
+#include <lcd_drv.h>
+
 
 int do_backlight_debug(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[])
 {
@@ -35,48 +38,21 @@ int do_backlight_debug(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[])
 		cmd = argv[2];
 		val = strtoul ( cmd, &endp, 10 );
 		backlight_set_level(val);
+		nvm_write_backlight_level(val,1);
 		return 0;
 	} else if ( strcmp ( cmd, "get" ) == 0 ) {
 		if ( argc < 2 ) {
 			goto usage;
 		}
-		val = backight_get_level();
+		//val = backight_get_level();
+		val = nvm_read_backlight_level();
 		printf("backlight: level = %d\n", val);
 		return 0;
 	} else if ( strcmp ( cmd, "status" ) == 0 ) {
 		if ( argc < 2 ) {
 			goto usage;
 		}
-		/* to do */
-		/* print backlight info */
-		printf("to do\n");
-		return 0;
-	} else if ( strcmp ( cmd, "bypass" ) == 0 ) {
-		/* to do */
-		/* bypass backlight level adjust */
-		printf("to do\n");
-		return 0;
-	} else if ( strcmp ( cmd, "pwm" ) == 0 ) {
-		if ( argc < 4 ) {
-			goto usage;
-		}
-		cmd = argv[2];
-		if ( strcmp ( cmd, "duty" ) == 0 ) {
-			/* to do */
-			/* change pwm duty */
-			printf("to do\n");
-			return 0;
-		} else if ( strcmp ( cmd, "freq" ) == 0 ) {
-			/* to do */
-			/* change pwm frequency */
-			printf("to do\n");
-			return 0;
-		} else if ( strcmp ( cmd, "pol" ) == 0 ) {
-			/* to do */
-			/* change pwm polarity */
-			printf("to do\n");
-			return 0;
-		}
+		backlight_info_print();
 		return 0;
 	}
 
@@ -106,13 +82,10 @@ int do_panel_debug(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[])
 		}
 		cmd = argv[2];
 		val = strtoul ( cmd, &endp, 10 );
-		if (val) {
-			printf("panel: enable\n");
-			panel_resume();
-		} else {
-			printf("panel: disable\n");
-			panel_suspend();
-		}
+		if (val)
+			panel_enable();
+		else
+			panel_disable();
 		return 0;
 	} else if ( strcmp ( cmd, "test" ) == 0 ) {
 		if ( argc < 3 ) {
@@ -128,9 +101,8 @@ int do_panel_debug(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[])
 		if ( argc < 2 ) {
 			goto usage;
 		}
-		/* to do */
-		/* reset panel */
-		printf("to do\n");
+		panel_disable();
+		panel_enable();
 		return 0;
 	} else if ( strcmp ( cmd, "ss" ) == 0 ) {
 		if ( argc < 3 ) {
@@ -140,7 +112,6 @@ int do_panel_debug(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[])
 		}
 		cmd = argv[2];
 		val = strtoul ( cmd, &endp, 10 );
-		panel_param->clk_ss_level = val;
 		set_lcd_clk_ss(val);
 		return 0;
 	} else if ( strcmp ( cmd, "phy" ) == 0 ) {
@@ -156,72 +127,38 @@ int do_panel_debug(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[])
 		temp[1] = strtoul ( cmd, &endp, 10 );
 		lcd_phy_adjust(temp[0], temp[1]);
 		return 0;
-	} else if ( strcmp ( cmd, "lvds" ) == 0 ) {
-		if ( argc < 6 ) {
-			goto usage;
-		}
-		cmd = argv[2];
-		temp[0] = strtoul ( cmd, &endp, 10 );
-		cmd = argv[3];
-		temp[1] = strtoul ( cmd, &endp, 10 );
-		cmd = argv[4];
-		temp[2] = strtoul ( cmd, &endp, 10 );
-		cmd = argv[5];
-		temp[3] = strtoul ( cmd, &endp, 10 );
-		/* to do */
-		/* set lvds config */
-		printf("to do\n");
-		return 0;
-	} else if ( strcmp ( cmd, "vbyone" ) == 0 ) {
-		if ( argc < 5 ) {
-			goto usage;
-		}
-		cmd = argv[2];
-		temp[0] = strtoul ( cmd, &endp, 10 );
-		cmd = argv[3];
-		temp[1] = strtoul ( cmd, &endp, 10 );
-		cmd = argv[4];
-		temp[2] = strtoul ( cmd, &endp, 10 );
-		/* to do */
-		/* set vbyone config */
-		printf("to do\n");
-		return 0;
 	} else if ( strcmp ( cmd, "info" ) == 0 ) {
 		if ( argc < 2 ) {
 			goto usage;
 		}
-		/* to do */
-		/* print panel info */
-		printf("to do\n");
+		lcd_info_print();
 		return 0;
 	} else if ( strcmp ( cmd, "reg" ) == 0 ) {
 		if ( argc < 2 ) {
 			goto usage;
 		}
-		/* to do */
-		/* print panel reg */
-		printf("to do\n");
+		lcd_reg_print();
 		return 0;
-	}
-	 else if ( strcmp ( cmd, "dump" ) == 0 ) {
+	} else if ( strcmp ( cmd, "dump" ) == 0 ) {
 		if ( argc < 2 ) {
 			goto usage;
 		}
-		/* to do */
-		/* print panel info & reg */
-		printf("to do\n");
+		lcd_info_print();
+		lcd_reg_print();
 		return 0;
-	}
-	 else if ( strcmp ( cmd, "debug_print" ) == 0 ) {
+	} else if ( strcmp ( cmd, "logo" ) == 0 ) {
 		if ( argc < 3 ) {
 			goto usage;
 		}
 		cmd = argv[2];
 		val = strtoul ( cmd, &endp, 10 );
-		/* to do */
-		/* set panel debug print */
-		printf("to do\n");
+		if (val)
+			display_logo();
+		else
+			hide_logo();
 		return 0;
+	} else if ( strcmp ( cmd, "training" ) == 0 ) {
+		vbyone_training_Handle();
 	}
 
 usage:

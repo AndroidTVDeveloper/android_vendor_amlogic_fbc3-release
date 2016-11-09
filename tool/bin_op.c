@@ -11,6 +11,7 @@ that is stored on spi.
 #include <sys/types.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <panel.h>
 #include <board_config.h>
 
 #define CC_MAX_BIN_FILE_SIZE    CONFIG_SPI_SIZE

@@ -11,7 +11,7 @@ int main ( int argc, char **argv )
 {
 	FILE *out = NULL;
 	int i = 0;
-	char *amp = &amplifier[0][0];
+	char *amp = (char*)&amplifier[0][0];
 	char *finevolume = &fine_volume[0][0];
 	char *drc1_tko = NULL;
 	char *drc1_table = NULL;
@@ -19,29 +19,29 @@ int main ( int argc, char **argv )
 	char *wall_mode = NULL;
 
 	if ( user_param.DRC_mode == SPEAKER_12V6ohm8w ) {
-		drc1_tko = &drc1_tko_table_12V6ohm8w[0][0];
-		drc1_table = &drc1_table_12V6ohm8w[0][0];
+		drc1_tko = (char *)&drc1_tko_table_12V6ohm8w[0][0];
+		drc1_table = (char *)&drc1_table_12V6ohm8w[0][0];
 
 	} else {
-		drc1_tko = &drc1_tko_table_12v6ohm6w[0][0];
-		drc1_table = &drc1_table_12v6ohm6w[0][0];
+		drc1_tko = (char *)&drc1_tko_table_12v6ohm6w[0][0];
+		drc1_table = (char *)&drc1_table_12v6ohm6w[0][0];
 	}
 
 	if ( user_param.Screen_size == SCREEN_40_42_inch ) {
-		table_mode = &table_mode_40_42[0][0][0];
-		wall_mode = &wall_mode_40_42[0][0][0];
+		table_mode = (char *)&table_mode_40_42[0][0][0];
+		wall_mode = (char *)&wall_mode_40_42[0][0][0];
 
 	} else if ( user_param.Screen_size == SCREEN_32_inch ) {
-		table_mode = &table_mode_32[0][0][0];
-		wall_mode = &wall_mode_32[0][0][0];
+		table_mode = (char *)&table_mode_32[0][0][0];
+		wall_mode = (char *)&wall_mode_32[0][0][0];
 
 	} else if ( user_param.Screen_size == SCREEN_48_inch ) {
-		table_mode = &table_mode_48[0][0][0];
-		wall_mode = &wall_mode_48[0][0][0];
+		table_mode = (char *)&table_mode_48[0][0][0];
+		wall_mode = (char *)&wall_mode_48[0][0][0];
 
 	} else {
-		table_mode = &table_mode_55[0][0][0];
-		wall_mode = &wall_mode_55[0][0][0];
+		table_mode = (char *)&table_mode_55[0][0][0];
+		wall_mode = (char *)&wall_mode_55[0][0][0];
 	}
 
 	out = fopen ( "rom_audioparam", "wb" );

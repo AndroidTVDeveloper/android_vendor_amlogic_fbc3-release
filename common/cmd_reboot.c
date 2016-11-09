@@ -8,6 +8,8 @@ int do_reboot ( cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[] )
 {
 	serial_puts ( "enter reboot\n" );
 
+	save_custom_uart_params( 0, 0 );
+
 	if ( argc == 1 ) {
 		return reboot ( 0 );
 
@@ -18,13 +20,18 @@ int do_reboot ( cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[] )
 					unsigned stage = get_boot_stage();
 					unsigned reson;
 
+/*
 					if ( argc > 3 && !strcmp ( "uart1", argv[3] ) ) {
 						FIR_BOOT_STAGE == stage ? reson = REBOOT_FLAG_LITE_UPGRADE2 : reson = REBOOT_FLAG_UPGRADE2;
 #ifdef IN_FBC_MAIN_CONFIG
-						panel_suspend();
+						panel_enable();
 #endif
 						return reboot ( reson );
 					}
+*/
+
+					if ( argc > 3 )
+						save_custom_uart_params(0, atoi(argv[3]));
 
 					if ( FIR_BOOT_STAGE == stage ) {
 						reson = REBOOT_FLAG_LITE_UPGRADE1;
@@ -34,7 +41,7 @@ int do_reboot ( cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[] )
 					}
 
 #ifdef IN_FBC_MAIN_CONFIG
-					panel_suspend();
+					panel_enable();
 #endif
 					return reboot ( reson );
 
@@ -43,7 +50,7 @@ int do_reboot ( cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[] )
 
 					if ( MAIN_STAGE == stage ) {
 #ifdef IN_FBC_MAIN_CONFIG
-						panel_suspend();
+						panel_enable();
 #endif
 					}
 

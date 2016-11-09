@@ -2,6 +2,11 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <common.h>
+#include <board_config.h>
+
+#ifdef CONFIG_CUSTOMER_PROTOCOL
+#include <cmdid.h>
+#endif
 
 #define CONFIG_SYS_PBSIZE 256
 
@@ -598,6 +603,18 @@ int printf ( const char *__fmt, ... )
 	va_end ( args );
 	/* Print the string */
 	serial_puts ( printbuffer );
+
+#if (defined IN_FBC_MAIN_CONFIG) && (defined CONFIG_CUSTOMER_PROTOCOL)
+	extern int write_log_buf ( const char *buf );
+	extern int LogcatTaskID;
+
+	if (!factory_mode_enable && en_tx_log_to_ap) {
+		write_log_buf( printbuffer );
+		if ( LogcatTaskID > 0 )
+			WakeupTaskByID ( LogcatTaskID );
+	}
+#endif
+
 	return i;
 }
 

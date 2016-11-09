@@ -30,7 +30,7 @@ int do_cri ( cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[] )
 		cmd = argv[2];
 
 		if ( strcmp ( cmd, "r" ) == 0 ) {
-			tmp_val = read_project_id();
+			tmp_val = nvm_read_project_id();
 			printf ( "current project id is %d.\n", tmp_val );
 			return 0;
 
@@ -42,7 +42,7 @@ int do_cri ( cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[] )
 			cmd = argv[3];
 			tmp_val = strtoul ( cmd, &endp, 16 );
 
-			if ( write_project_id ( tmp_val ) == 0 ) {
+			if ( nvm_write_project_id ( tmp_val ) == 0 ) {
 				printf ( "save project id %d only ok.\n", tmp_val );
 
 			} else {
@@ -59,7 +59,7 @@ int do_cri ( cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[] )
 			cmd = argv[3];
 			tmp_val = strtoul ( cmd, &endp, 16 );
 
-			if ( select_project_id ( tmp_val ) == 0 ) {
+			if ( nvm_switch_project_id ( tmp_val ) == 0 ) {
 				printf ( "save pro_id %d,load pqok.\n", tmp_val, tmp_val );
 
 			} else {
@@ -77,7 +77,7 @@ int do_cri ( cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[] )
 		cmd = argv[2];
 
 		if ( strcmp ( cmd, "r" ) == 0 ) {
-			tmp_ptr = read_factory_sn();
+			tmp_ptr = nvm_read_factory_sn();
 			printf ( "current factory sn is %s.\n", tmp_ptr );
 			return 0;
 
@@ -88,7 +88,7 @@ int do_cri ( cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[] )
 
 			cmd = argv[3];
 
-			if ( write_factory_sn ( ( char * ) cmd ) == 0 ) {
+			if ( nvm_write_factory_sn ( ( char * ) cmd ) == 0 ) {
 				printf ( "save factory sn \"%s\" ok.\n", cmd );
 
 			} else {
@@ -106,7 +106,7 @@ int do_cri ( cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[] )
 		cmd = argv[2];
 
 		if ( strcmp ( cmd, "r" ) == 0 ) {
-			tmp_ptr = read_device_id();
+			tmp_ptr = nvm_read_device_id();
 			printf ( "current device id is %s.\n", tmp_ptr );
 			return 0;
 
@@ -117,7 +117,7 @@ int do_cri ( cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[] )
 
 			cmd = argv[3];
 
-			if ( write_device_id ( ( char * ) cmd ) == 0 ) {
+			if ( nvm_write_device_id ( ( char * ) cmd ) == 0 ) {
 				printf ( "save device id \"%s\" ok.\n", cmd );
 
 			} else {

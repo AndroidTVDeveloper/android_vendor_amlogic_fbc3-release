@@ -1,7 +1,7 @@
 #include <cmd.h>
 const cmd_def_t cmd_def[MAX_CMD] = {
 	/* Index start 0x00 */
-	{ 0x13, 0x08, 0xFAA5, 1, 0, 0 }, /* Index offset 0x0 */
+	{ 9, 2, 0xf, 0, 0, 0 }, /* Index offset 0x0 */
 	{ 5, 1, 3, 0, 0, 0 }, /* Index offset 0x1 */
 	{ 1, 0, 0, 0, 0, 0 }, /* Index offset 0x2 */
 	{ 0, 0, 0, 0, 0, 0 }, /* Index offset 0x3 */
@@ -121,7 +121,7 @@ const cmd_def_t cmd_def[MAX_CMD] = {
 	{ 2, 1, 1, 0, 0, 0 }, /* Index offset 0x9 */
 	{ 0, 0, 0, 0, 0, 0 }, /* Index offset 0xa */
 	{ 0, 0, 0, 0, 0, 0 }, /* Index offset 0xb */
-	{ 0, 0, 0, 0, 0, 0 }, /* Index offset 0xc */
+	{ 2, 1, 1, 0, 0, 0 }, /* Index offset 0xc */
 	{ 0, 0, 0, 0, 0, 0 }, /* Index offset 0xd */
 	{ 0, 0, 0, 0, 0, 0 }, /* Index offset 0xe */
 	{ 0, 0, 0, 0, 0, 0 }, /* Index offset 0xf */

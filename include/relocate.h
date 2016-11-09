@@ -14,12 +14,12 @@
 #define SRAM_SIZE 0x10000
 
 extern partition_info_t* get_partition_info(int section, int partition);
-extern int check_image_info(unsigned h_addr, unsigned t_addr);
-//extern int check_partition_info(int section, int partition);
+extern int check_partition(partition_info_t *info);
 extern int copy_partition_to_sram2(int section, int partition);
 extern int copy_partition_to_ccm(int section, int partition);
 extern int move_image(struct spi_flash *flash,unsigned s_offs,unsigned b_offs,unsigned size);
 extern int section_backup(struct spi_flash *flash);
 extern int section_restore(struct spi_flash *flash);
+extern int illegal_address_check(unsigned offset, unsigned size);
 
 #endif

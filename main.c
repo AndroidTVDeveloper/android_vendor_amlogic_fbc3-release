@@ -56,16 +56,22 @@ int main ( int argc, char *argv[] )
 	int cur_id = 0;
 	int tmp_val = 0;
 	/* lvds_phy_disable(); */
-	init_configures();
+	unsigned boot_flag = get_boot_flag();
+	set_boot_flag ( REBOOT_FLAG_FROM_WATCHDOG );
+	disable_watchdog();
+	set_watchdog_threshold ( 50000 ); //50000*128us=6.4s
+	enable_watchdog();
 	reset_watchdog();
+	init_configures();
 	printf ( "%s\n\n", FBC_BOOT_VERSION );
 	set_boot_stage ( MAIN_STAGE );
 	printf ( "fbc main code version:\n" );
 	print_build_version_info();
+	io_init();
 	printf ( "Power on.\n" );
 	power_on_aml();
 	printf ( "Enter main.\n" );
-
+	/*
 	p = calloc ( 1024, 1 );
 	printf ( "calloc returned %x\n", ( unsigned ) p );
 
@@ -73,7 +79,7 @@ int main ( int argc, char *argv[] )
 		strcpy ( p, "Hello World!\n" );
 		printf ( " %x:%s", ( unsigned ) p, p );
 	}
-
+	*/
 	printf ( "Init spi flash.\n" );
 	init_spi_flash();
 #ifdef __TEST_RUNNING_ON_SPI_CODE__
@@ -93,26 +99,22 @@ int main ( int argc, char *argv[] )
 	printf("Init log.\n");
 	init_log();
 	printf ( "Init user setting.\n" );
-	init_setting_task();
-	printf ( "Init Panel.\n" );
-	panel_init();
-	printf ( "Panel power on.\n" );
-	panel_power_on_aml();
-	tmp_val = get_panel_power_on_dly();
-	mdelay ( tmp_val );
+	nvm_init_task();
+	printf ( "Init Panel info.\n" );
+	panel_pre_load(); /* get pid & panel info */
 	/* printf("in main phy register = 0x%08x\n",
 	 (* (volatile unsigned long *)0x80030628)); */
 	printf ( "Init Display.\n" );
 	init_display();
 	printf ( "Init Vpp.\n" );
 	init_vpp();
+	printf ( "Panel power on.\n" );
+	panel_gpio_config();
+	panel_enable();
+	init_load_user_setting();
 	printf ( "Init OSD.\n" );
 	init_ui();
 	card_system_pw();
-#ifdef ENABLE_LOCAL_DIMMING
-	printf ( "Init ldim.\n" );
-	init_ldim();
-#endif
 	/* printf("set bri con sat hue & wb.\n"); */
 	/* vpu_pq_set(); */
 	/* mdelay(400); */
@@ -153,11 +155,11 @@ int main ( int argc, char *argv[] )
 #ifdef CLK_TEST
 	printf
 	( "**********************clock**********************************\n" );
-	int vx1_clk = hdmirx_get_clock ( 33 );
-	int vid_clk = hdmirx_get_clock ( 30 );
+	unsigned int vx1_clk = hdmirx_get_clock ( 33 );
+	unsigned int vid_clk = hdmirx_get_clock ( 30 );
 	int test_ok = 0;
 
-	if ( ( ( vx1_clk / 1000000 ) == 292 ) && ( ( vid_clk / 1000000 ) == 585 ) ) {
+	if ( ( ( vx1_clk / 1000 ) == 292 ) && ( ( vid_clk / 1000 ) == 585 ) ) {
 		test_ok = 1;
 	}
 
@@ -185,6 +187,17 @@ int main ( int argc, char *argv[] )
 	 RegisterTask(audio_in_process, NULL, 1<<IRQ_I2S_IN, 8); */
 	/* int led_task_id =
 	 RegisterTask(led_precess, 1<<IRQ_TIMER, 15); */
+	if (( boot_flag > REBOOT_FLAG_FROM_WATCHDOG )
+	&& ( boot_flag <= REBOOT_FLAG_FROM_MAIN_WATCHDOG )) {
+		printf ( "error: %dth reboot from main watchdog!\n", REBOOT_FLAG_FROM_MAIN_WATCHDOG - boot_flag + 1 );
+		set_boot_flag ( boot_flag - 1 );
+	}
+	else
+		set_boot_flag ( REBOOT_FLAG_FROM_MAIN_WATCHDOG );
+	disable_watchdog();
+	set_watchdog_threshold ( 23438 ); //3sec
+	enable_watchdog();
+	reset_watchdog();
 	MainTask();
 	return 0;
 }

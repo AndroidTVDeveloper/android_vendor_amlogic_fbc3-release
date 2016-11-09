@@ -7,7 +7,6 @@
 #include <reboot.h>
 #include <uart_api.h>
 #include <relocate.h>
-
 #include <update.h>
 //#include <register.h>
 
@@ -34,23 +33,20 @@ int static gmsg_status_type = 0;
 #define DEVICE_UART_PORT_2       2
 
 #ifndef _USE_WITHOUT_UI_UPDATE_
-/*extern void panel_init(void);
- */
 int gTitleMsgHandle = -1;
 int gUpdateMsgHandle = -1;
 int gUpdateTimeHandle = -1;
 
-extern void vbyone_gclk_en (int enable );
 extern void vbyone_training_Handle();
 
 #ifdef HAVE_PRO_LOGO
 void show_logo(unsigned line, unsigned position)
 {
     for (int i = 0; i < LOGO_V_FONTS; i++) {
-		OSD_InitialRegion(line + i, position, logo[i],
-				logo_color[i]);
-	}
-	printf("show_logo.\n");
+        OSD_InitialRegion(line + i, position, logo[i],
+                     logo_color[i]);
+    }
+    printf("show_logo.\n");
 }
 #endif
 
@@ -60,7 +56,7 @@ void init_osd ( void )
 	/* hide_logo(); */
 	OSD_Enable ( 0 );
 
-	if ( IS_1080P ( panel_param->output_mode ) ) {
+	if ( IS_1080P ( panel_param->timing ) ) {
 		OSD_Initial ( 1920, 1080, 0, 0, 1919, 1079 );
 		OSD_SetFontScale ( 1, 1 );
 
@@ -248,23 +244,6 @@ void mdelay ( int ms )
 
 #endif
 
-#if 0//Qy mark
-void osd_vpu_clock_set ( void )
-{
-#if 1
-	vpu_timing_t vpu_timing = get_timing_mode();
-
-	if ( T_1080P50HZ == get_output_mode() ) {
-		vclk_set_encl_lvds ( vpu_timing, LVDS_PORTS );
-
-	} else {
-		vclk_set_encl_vx1 ( vpu_timing, VX1_LANE_NUM, VX1_BYTE_NUM );
-	}
-
-#endif
-}
-#endif
-
 static void vs_interrupt_handle ( void *arg )
 {
 	if ( updateui_time ) {
@@ -286,14 +265,16 @@ static void vs_interrupt_handle ( void *arg )
 	}
 }
 
-void interrupt_init()
+void interrupt_init(void)
 {
 	int ret;
 
-	ret = RegisterInterrupt ( 0x10, INT_TYPE_IRQ, ( interrupt_handler_t ) vs_interrupt_handle );
+	#define INT_VPU_VSYNC	0x10
+
+	ret = RegisterInterrupt ( INT_VPU_VSYNC, INT_TYPE_IRQ, ( interrupt_handler_t ) vs_interrupt_handle );
 
 	if ( ret == 0 ) {
-		SetInterruptEnable ( 0x10, 1 );
+		SetInterruptEnable ( INT_VPU_VSYNC, 1 );
 		printf("vs interrupt_init \n");
 	}
 }
@@ -304,8 +285,15 @@ int main ( int argc, char *argv[] )
 	int tmp_val = 0;
 	unsigned int boot_flag = get_boot_flag();
 	update_ctrl_t update_ctrl;
+
+	enable_custom_baudRate(1);
+
 	serial_init ( CONSOLE_CHANNEL_DEV );
 	serial_puts ( "serial uart port 0 init success!\n" );
+
+	struct customParams_t customParams = get_custom_uart_params();
+	printf ("%s(), Custom baudRate is %u\n", __func__, customParams.baudRate);
+
 	serial_dev = get_serial_device ( CONSOLE_CHANNEL_DEV );
 	serial_puts ( "init spi flash!\n" );
 	init_spi_flash();
@@ -313,26 +301,17 @@ int main ( int argc, char *argv[] )
 #ifndef _USE_WITHOUT_UI_UPDATE_
 	serial_puts ( "Power on.\n" );
 	power_on_aml();
-	serial_puts ( "Init Panel.\n" );
-	panel_init();
-	panel_power_on_aml();
-	tmp_val = get_panel_power_on_dly();
-	mdelay ( tmp_val );
+	serial_puts ( "Init Panel info.\n" );
+	panel_pre_load(); /* get pid & panel info */
 	serial_puts ( "Init Vpp.\n" );
 	init_vpp();
 	interrupt_init();
 	card_system_pw();
-#ifdef ENABLE_LOCAL_DIMMING
-	printf ( "Init ldim.\n" );
-	init_ldim();
-#endif
-	//osd_vpu_clock_set();
 	init_osd();
 #ifndef HAVE_PRO_LOGO
 	show_title_msg ( 0, "Updating..." );
 #endif
-	serial_puts ( "panel_resume.\n" );
-	panel_resume();
+	panel_enable();
 #if 0
 	uart_ports_open ( DEVICE_UART_PORT_1 );
 	create_timer ( TIMERA_INDEX, TIMER_TICK_1MS, 10, fn ); /* 10ms */
@@ -348,19 +327,20 @@ int main ( int argc, char *argv[] )
 	serial_puts ( "enter while.\n" );
 	//backup section 0 to section 1
 	int backup_time = OSTimeGet();
-	section_backup(get_spi_flash_device(0));
+	do {
+		ret = section_backup(get_spi_flash_device(0));
+	} while (ret);
 	backup_time = OSTimeGet() - backup_time;
 	printf ( "backup time = %d\n", backup_time);
-	vbyone_gclk_en(0);
+
 	do {
 
-#if (LOCKN_TYPE_SEL == LOCKN_TYPE_B)
-	//start_lockn_flag = 1;
-		if ( T_1080P50HZ != panel_param->output_mode ) {
+		//start_lockn_flag = 1;
+		if ( PANEL_IF_VBYONE == panel_param->interface ) {
 			//LOCKN_IRQ_Handle_new();
 			vbyone_training_Handle();
 		}
-#endif
+
 		ret = handle_cmd(&update_ctrl);
 #ifndef HAVE_PRO_LOGO
 #ifndef _USE_WITHOUT_UI_UPDATE_

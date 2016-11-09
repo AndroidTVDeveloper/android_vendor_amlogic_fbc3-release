@@ -11,7 +11,7 @@ SECTIONS {
     .rodata: { *(.rodata) }
   } > SRAM2
   GROUP: {
-    .data ADDR(0x800297d0): { *(.data) }
+    .data ADDR(0x80029800): { *(.data) }
     .data1: { *(.data1) }
     .bss: { *(.bss) }
     .tls?: { *(.tls) }

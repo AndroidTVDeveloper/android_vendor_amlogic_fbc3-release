@@ -16,7 +16,7 @@
 #define LOG_LEVEL_D		0x2
 #define LOG_LEVEL_I		0x3
 #define LOG_LEVEL_V		0x5
-#define MAX_LOG_BUF_SIZE 4096
+#define MAX_LOG_BUF_SIZE 2048//Qy for reduce size 4096
 #define LINE_SIZE	128
 #define TAG_SIZE	16
 #define FILTER_SIZE	4

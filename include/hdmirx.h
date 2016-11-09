@@ -74,7 +74,7 @@ struct tvin_hdr_data_s {
 extern unsigned int    dpll_ctr2;
 extern unsigned int    dpll_ctr[6];
 
-extern int backporch_unstable;
+//extern int backporch_unstable;
 extern int frontporch_unstable;
 extern int hsync_pixel_unstable;
 extern int active_pixel_unstable;
@@ -99,6 +99,9 @@ extern int enable_10bit;
 extern int clk_divider;
 extern int enable_10bit_input;
 extern int pll_rst_counter;
+
+extern int hdmirx_fsm_pause;
+extern int hdmirx_int_pro_pause;
 
 // Use the following functions to access the HDMIRX modules (TOP, DWC or PHY) by default
 //extern void             hdmirx_wr_only_reg  (unsigned char dev_id, unsigned long addr, unsigned long data);
@@ -131,8 +134,8 @@ extern void 			HDMIRX_IRQ_Handle ( void *arg );
 extern void 			hdmirx_config ( void );
 extern void 			hdmirx_phy_init ( void );
 #ifdef ENABLE_AVMUTE_CONTROL
-	extern void 			hdmi_avmute ( int en );
-	extern int avmute_count;
+//extern void 			hdmi_avmute ( int en );
+extern int avmute_count;
 #endif
 // extern void hdmirx_avmute ( int en );
 // Internal functions:
@@ -155,16 +158,50 @@ void            hdmirx_key_setting  (   unsigned char           encrypt_en );
 
 int 			hdmi_rx_phy_pll_lock ( void );
 int 			hdmi_rx_audio_pll_lock ( void );
-extern int 			hdmirx_get_clock ( int index );
-int 			hdmirx_get_tmds_clock ( void );
+extern unsigned int hdmirx_get_clock ( int index );
 void 			hdmirx_phy_init ( void );
 void 			hdmirx_audio_control ( char enable );
 extern void hdmirx_phy_init ( void );
 int drm_handler(void);
 void hdmirx_get_hdr_property(struct tvin_hdr_data_s *hdr_data);
+int hdmirx_get_hdr_attach_cnt(void);
+extern void hdmi_rx_hpd(int HighLow);
+extern char io_hdmi_5v_pw ( void );
+extern void hdmirx_int_get_status(void);
+extern void hdmirx_int_clr_status(void);
 
 //------------------------------------------------------------------------------
 // Defines for simulation
 //------------------------------------------------------------------------------
 
+typedef enum TimingID{
+	K_ID_NOTSUPPORT = 0,
+	K_ID_NOTSIGNAL,
+	K_ID_1080P50,
+	K_ID_1080P60,
+	K_ID_3840x2160P50,
+	K_ID_3840x2160P60,
+	K_ID_3840x2160P50420,
+	K_ID_3840x2160P60420,
+	K_ID_3840x2160P50420_1,
+	K_ID_3840x2160P60420_1,
+	K_ID_END,
+}eTimingID;
+
+
+typedef struct timingWind{
+	int HValid;
+	int VValid;
+	int HTotal;
+	int VTotal;
+}stTimingWind;
+
+typedef struct timing{
+	eTimingID ID;
+	stTimingWind window;
+}stTiming;
+
+#define diffRange(a,b)	(( a > b ) ? ( a - b ) : ( b - a ))
+
 #endif /* HDMIRX_H */
+

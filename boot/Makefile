@@ -66,6 +66,7 @@ OBJS     = $(SSRCS:%.s=%.o$(SUFFIX)) $(SRCS:%.c=%.o$(SUFFIX))
 
 SUS_SSRCS	 = boot_rom.s
 SUS_SRCS     = suspend.c
+SUS_SRCS    += ../project/config.c
 SUS_SRCS    += ../project/$(board)/power.c
 SUS_SRCS    += ../project/$(board)/suspend_power.c
 SUS_SRCS    += ../project/customer_key_conf.c

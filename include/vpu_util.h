@@ -61,14 +61,6 @@ void enable_demura ( int enable );
 void config_pwm ( unsigned short pwm_freq, vpu_timing_t timing, unsigned short pwm_duty );
 void config_3dsync_3dgls();
 
-//Output
-void set_vpu_output_mode ( int mode );
-void set_LVDS_output ( int ports );
-void set_LVDS_output_ex ( unsigned char clk, unsigned char repack, unsigned char odd_even,
-						  unsigned char hv_invert, unsigned char lsb_first, unsigned char pn_swap, unsigned char ports,
-						  unsigned char bit_size, unsigned char b_sel, unsigned char g_sel, unsigned char r_sel,
-						  unsigned char de_exten, unsigned char blank_align, unsigned char lvds_swap, unsigned char clk_pin_swap );
-
 /*kuka@20140618 add begin*/
 typedef struct vframe_hist_s {
 	unsigned int   hist_pow;
@@ -80,7 +72,7 @@ typedef struct vframe_hist_s {
 	unsigned int   bin_mode;	 // 1:32bin mode;0:64bin mode
 	unsigned char  luma_max;
 	unsigned char  luma_min;
-	unsigned short gamma[66];
+	unsigned int	gamma[66];
 } vframe_hist_t;
 extern void vpu_get_hist_info ( void );
 extern void init_dnlp_para ( void );
@@ -91,18 +83,19 @@ extern void vpu_set_gamma_lut ( int Idx, int *pBuf, int sizeItem );
 extern void enable_output ( int enable );
 extern void enable_timgen ( int enable );
 extern void enable_dnlp ( int enable );
-extern void set_dnlp_parm ( int param1, int param2 );
+extern void set_dnlp_parm1 ( unsigned int *param );
+extern void set_dnlp_parm2 ( unsigned int *param );
 extern void get_dnlp_parm ( void );
-extern void enable_backlight ( int enable );
 extern void vpu_backlight_adj ( unsigned int val_ui, vpu_timing_t timing );
 extern void vpu_bri_adj ( unsigned int bri_ui );
 extern void vpu_con_adj ( unsigned int con_ui );
-extern void vpu_wb_gain_adj ( unsigned int gain_ui, vpu_wbsel_t rgb_sel );
-extern void vpu_wb_offset_adj ( int offset_ui, vpu_wbsel_t rgb_sel, vpu_wboffset_pos_t pre_post );
+extern void vpu_wb_gain_adj ( unsigned int gain, vpu_wbsel_t rgb_sel );
+extern void vpu_wb_offset_adj ( int offset, vpu_wbsel_t rgb_sel, vpu_wboffset_pos_t pre_post );
 extern void vpu_saturation_adj ( unsigned int val_ui );
 extern void vpu_hue_adj ( unsigned int val_ui );
-extern void vpu_picmod_adj ( vpu_picmod_t val_ui );
-extern void vpu_colortemp_adj ( vpu_colortemp_t val_ui );
+extern void vpu_pq_picmod_adj ( vpu_picmod_e val_ui );
+//extern void vpu_colortemp_adj ( vpu_wb_e val_ui );
+extern void vpu_colortemp_adj ( vpu_wb_t *wb_data );
 extern void vpu_color_bar_mode ( void );
 extern void vpu_patgen_bar_set ( unsigned int r_val, unsigned int g_val, unsigned int b_val );
 extern void vpu_testpat_def ( void );
@@ -120,7 +113,9 @@ extern void fbc_adj_hue ( unsigned int hue_ui );
 extern void set_color_gamut ( int mode );
 extern void vpu_set_color_surge ( unsigned int mode, vpu_timing_t timing_cur );
 extern void vpu_csc_config_ext ( unsigned int sel );
-extern void vpu_pq_set ( void );
+
+//extern int nvm_write_gamma_idx ( int temp_value );
+
 
 /*kuka@20140618 add end*/
 //

@@ -7,10 +7,9 @@ SUSPENDDATASIZE = $(shell echo `stat -c %s suspend_data.bin`)
 UPDATECODESIZE = $(shell echo `stat -c %s update_code.bin`)
 UPDATEDATASIZE = $(shell echo `stat -c %s update_data.bin`)
 
-BOOT_H_CHECK_INFO_SIZE = 48
 FIRSTBOOTCODEPADSIZE = 16384
 FIRSTBOOTDATAPADSIZE = 4096
-BOOTCODEPADSIZE = 38864
+BOOTCODEPADSIZE = 38912
 BOOTDATAPADSIZE = 6144
 SUSPENDCODEPADSIZE = 20480
 SUSPENDDATAPADSIZE = 4096
@@ -67,11 +66,7 @@ ifeq ("$(call compare,$(BOOTCODESIZE),$(BOOTCODEPADSIZE))", "gt")
 	@echo "Error! code size > $(BOOTCODEPADSIZE)!"
 	exit 1
 endif
-	head -c $(BOOT_H_CHECK_INFO_SIZE) /dev/zero > second_boot_checkinfo.bin
 	head -c $(BOOTCODEPADDING) /dev/zero >> second_boot_code.bin
-	cat second_boot_code.bin >> second_boot_checkinfo.bin
-	rm second_boot_code.bin
-	mv second_boot_checkinfo.bin second_boot_code.bin
 ifeq ("$(call compare,$(BOOTDATASIZE),$(BOOTDATAPADSIZE))", "gt")
 	@echo "Error! data size > $(BOOTDATAPADSIZE)!"
 	exit 1

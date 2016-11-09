@@ -18,6 +18,7 @@
 #include <board_config.h>
 
 static LIST_HEAD ( osd_input_data_list );
+void show_logo ( unsigned line, unsigned position );
 
 static int osd_init;
 static int logo_handle[LOGO_V_FONTS] = { -1 };
@@ -166,6 +167,8 @@ int osd_task_id;
 static int logo_task_id;
 static int logo_timer_id;
 
+s_info_pro gstInfo_sts = {0,0};
+
 int UiGetHaveLogoFlag ( void )
 {
 	return UI_HAVE_LOGO;
@@ -195,16 +198,50 @@ int osd_task_handle ( int task_id, void *param )
 
 int logo_task_handle ( int task_id, void *param )
 {
-	release_timer ( logo_timer_id );
+	//printf(" >>>>>>>>> %s \n",__FUNCTION__);
 
+	#if 0
+	release_timer ( logo_timer_id );
 	if ( UiGetHaveLogoFlag() == 1 ) {
 		hide_logo();
-
-	} else {
-		backlight_power_ctrl( 1 );
 	}
+	#else
+	if (gstInfo_sts.info_do ) {
+		printf(" handle info=0x%x \n",gstInfo_sts.mode);
+		if (( gstInfo_sts.mode&eInfo_HideLogo ) == eInfo_HideLogo ) {
+			gstInfo_sts.mode &= ~eInfo_HideLogo;
+			//hide_logo();
+			OSD_Enable ( 0 );
+		} else if (( gstInfo_sts.mode&eInfo_ShowLogo ) == eInfo_ShowLogo ) {
+			gstInfo_sts.mode &= ~eInfo_ShowLogo;
+			if (sosd_get_enable() == 0) {
+				//show_logo ( 12, 705 );
+				OSD_Enable ( 1 );
+			}
+		} else if (( gstInfo_sts.mode&eInfo_HideInfo ) == eInfo_HideInfo ) {
+			gstInfo_sts.mode &= ~eInfo_HideInfo;
+			//hide_logo();
+			OSD_Enable ( 0 );
+		} else if (( gstInfo_sts.mode&eInfo_ShowNosignal ) == eInfo_ShowNosignal ) {
+			gstInfo_sts.mode &= ~eInfo_ShowNosignal;
+			if (sosd_get_enable() == 0) {
+				//show_logo ( 12, 705 );
+				OSD_Enable ( 1 );
+			}
+		} else {
+			gstInfo_sts.info_do = 0;
+		}
+	}
+	#endif
 
 	return 0;
+}
+
+void info_mode( int mode )
+{
+	gstInfo_sts.mode |= mode;
+	gstInfo_sts.info_do = 1;
+	printf("do> info_mode=0x%x\n",gstInfo_sts.mode);
 }
 
 /* static int volume; */
@@ -637,8 +674,10 @@ void hide_logo ( void )
 
 void display_logo(void)
 {
-	show_logo ( 12, 705 );
-	OSD_Enable ( 1 );
+	if (sosd_get_enable() == 0) {
+		show_logo ( 12, 705 );
+		OSD_Enable ( 1 );
+	}
 }
 
 void init_osd ( void )
@@ -647,7 +686,7 @@ void init_osd ( void )
 	hide_logo();
 	OSD_Enable ( 0 );
 
-	if ( IS_1080P ( panel_param->output_mode ) ) {
+	if ( IS_1080P ( panel_param->timing ) ) {
 		OSD_Initial ( 1920, 1080, 60, 60, 1859, 1019 );
 		OSD_SetFontScale ( 1, 1 );
 
@@ -694,7 +733,7 @@ void init_logo_osd ( void )
 
 	/* OSD_Initial(1920, 1080, 725, 360, 1194, 719); */
 	/* OSD_Initial(1920,1080,0,0,1919,1079); */
-	if ( IS_1080P ( panel_param->output_mode ) ) {
+	if ( IS_1080P ( panel_param->timing ) ) {
 		OSD_Initial ( 1920, 1080, 0, 0, 1919, 1079 );
 		OSD_SetFontScale ( 1, 1 );
 
@@ -730,8 +769,12 @@ void init_logo_osd ( void )
 	/* Delay_ms(20); */
 	OSD_CleanScreen ( NULL, 0 );
 	/* Delay_ms(20); */
+
 	show_logo ( 12, 705 );
+#if (K_NO_SIGNAL_INFO == 0)
 	OSD_Enable ( 1 );
+#endif
+
 	osd_init = 0;
 }
 
@@ -773,9 +816,9 @@ void init_ui ( void )
 	if ( UiGetHaveLogoFlag() == 1 ) {
 		init_logo_osd();
 		logo_task_id = RegisterTask ( logo_task_handle, NULL, 0, TASK_PRIORITY_OSD );
-#ifndef HAVE_PRO_LOGO
-		logo_timer_id = request_timer ( logo_task_id, 500 );
-#endif
+//#ifndef HAVE_PRO_LOGO
+		logo_timer_id = request_timer ( logo_task_id, 10 );//500
+//#endif
 
 	} else {
 		logo_task_id = RegisterTask ( logo_task_handle, NULL, 0, TASK_PRIORITY_OSD );
@@ -798,7 +841,7 @@ int KeyFunc ( unsigned int input_type, unsigned int customer_code, unsigned int 
 	if ( customer_key_map[10][0] == key_value ) {
 		printf ( "KeyFunc enter suspend\n" );
 		/* panel_power(read_project_id(), off); */
-		/* panel_suspend(); */
+		/* panel_enable(); */
 		/* reboot_sw(REBOOT_FLAG_SUSPEND); */
 	}
 
